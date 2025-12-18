@@ -314,9 +314,41 @@
         [data-theme="dark"] .card-body,
         [data-theme="dark"] .card-text,
         [data-theme="dark"] .card-body p,
-        [data-theme="dark"] .card-body span,
-        [data-theme="dark"] .card-body div {
+        [data-theme="dark"] .card-body span:not(.badge),
+        [data-theme="dark"] .card-body div:not(.progress):not(.badge),
+        [data-theme="dark"] .card-body label,
+        [data-theme="dark"] .card-body h1,
+        [data-theme="dark"] .card-body h2,
+        [data-theme="dark"] .card-body h3,
+        [data-theme="dark"] .card-body h4,
+        [data-theme="dark"] .card-body h5,
+        [data-theme="dark"] .card-body h6 {
             color: #e0e0e0;
+        }
+        
+        /* 深色模式：列表项 */
+        [data-theme="dark"] .list-group-item,
+        [data-theme="dark"] .list-group-item span,
+        [data-theme="dark"] .list-group-item p,
+        [data-theme="dark"] .list-group-item small {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 深色模式：通知公告 */
+        [data-theme="dark"] .notice-item,
+        [data-theme="dark"] .notice-title,
+        [data-theme="dark"] .notice-content,
+        [data-theme="dark"] .notice-meta {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 深色模式：课程安排 */
+        [data-theme="dark"] .schedule-item,
+        [data-theme="dark"] .course-item,
+        [data-theme="dark"] .equipment-item,
+        [data-theme="dark"] .class-item,
+        [data-theme="dark"] .booking-item {
+            color: #e0e0e0 !important;
         }
         
         /* 深色模式：统计数值 */
