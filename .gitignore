@@ -1,0 +1,25 @@
+# 编译输出
+*.o
+*.out
+*.exe
+*.dSYM/
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# 日志
+*.log
+server.log
+
+# 临时文件
+*.tmp
+*~

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教室资源管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90d9;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --sidebar-width: 250px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* 登录页面 */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-card h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .login-card .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .login-card .btn-login {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .login-card .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 主布局 */
+        .main-container {
+            display: none;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            padding-top: 20px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h4 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .sidebar-header small {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-item.active {
+            background: rgba(74, 144, 217, 0.3);
+            border-left-color: var(--primary-color);
+        }
+        
+        .nav-item i {
+            font-size: 18px;
+        }
+        
+        .content-area {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            font-weight: 600;
+        }
+        
+        /* 统计卡片 */
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #357abd 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card.green {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        
+        .stat-card.orange {
+            background: linear-gradient(135deg, #fd7e14 0%, #dc6502 100%);
+        }
+        
+        .stat-card.purple {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+        
+        .stat-card h3 {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .stat-card i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 60px;
+            opacity: 0.2;
+        }
+        
+        /* 表格样式 */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid #eee;
+            color: #666;
+            font-weight: 600;
+            padding: 15px;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr {
+            transition: background 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* 按钮样式 */
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 20px;
+        }
+        
+        .btn-primary:hover {
+            background: #357abd;
+            border-color: #357abd;
+        }
+        
+        .btn-action {
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+        
+        /* 状态徽章 */
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .badge-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* 课表视图 */
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .timetable th, .timetable td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .timetable th {
+            background: #f8f9fa;
+        }
+        
+        .timetable .time-cell {
+            background: #f8f9fa;
+            font-weight: 500;
+            width: 80px;
+        }
+        
+        .timetable .course-cell {
+            background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+        }
+        
+        .timetable .course-cell .course-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .timetable .course-cell .course-info {
+            opacity: 0.9;
+            font-size: 11px;
+        }
+        
+        /* 模态框 */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #eee;
+            padding: 15px 20px;
+        }
+        
+        /* 筛选器 */
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .filter-bar .form-control, .filter-bar .form-select {
+            border-radius: 8px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 页面切换动画 */
+        .page-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .content-area {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-container" id="loginPage">
+        <div class="login-card">
+            <h2><i class="bi bi-building"></i> 教室资源管理系统</h2>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="username" placeholder="用户名" value="admin">
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" id="password" placeholder="密码" value="admin123">
+                </div>
+                <button type="submit" class="btn btn-primary btn-login">登 录</button>
+            </form>
+            <div class="text-center mt-3 text-muted small">
+                默认管理员: admin / admin123
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主界面 -->
+    <div class="main-container" id="mainContainer">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-building"></i> 教室管理系统</h4>
+                <small id="currentUser">管理员</small>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>仪表盘</span>
+                </div>
+                <div class="nav-item" data-page="classrooms">
+                    <i class="bi bi-door-open"></i>
+                    <span>教室管理</span>
+                </div>
+                <div class="nav-item" data-page="courses">
+                    <i class="bi bi-book"></i>
+                    <span>课程管理</span>
+                </div>
+                <div class="nav-item" data-page="schedules">
+                    <i class="bi bi-calendar-week"></i>
+                    <span>排课管理</span>
+                </div>
+                <div class="nav-item" data-page="timetable">
+                    <i class="bi bi-table"></i>
+                    <span>课表查询</span>
+                </div>
+                <div class="nav-item" data-page="available">
+                    <i class="bi bi-search"></i>
+                    <span>空闲教室</span>
+                </div>
+                <div class="nav-item" data-page="statistics">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>统计分析</span>
+                </div>
+            </div>
+            <div class="nav-item" style="position: absolute; bottom: 20px; width: 100%;" onclick="logout()">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>退出登录</span>
+            </div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <div class="top-bar">
+                <h1 class="page-title" id="pageTitle">仪表盘</h1>
+                <div class="user-info">
+                    <span id="userRole">管理员</span>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+            </div>
+            
+            <!-- 仪表盘页面 -->
+            <div class="page-content active" id="page-dashboard">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <h3 id="statClassrooms">0</h3>
+                            <p>教室总数</p>
+                            <i class="bi bi-door-open"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card green">
+                            <h3 id="statCourses">0</h3>
+                            <p>本学期课程</p>
+                            <i class="bi bi-book"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card orange">
+                            <h3 id="statTeachers">0</h3>
+                            <p>教师人数</p>
+                            <i class="bi bi-person"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card purple">
+                            <h3 id="statUtilization">0%</h3>
+                            <p>平均利用率</p>
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-clock-history"></i> 今日课程安排
+                            </div>
+                            <div class="card-body">
+                                <div id="todaySchedule">
+                                    <div class="loading"><div class="spinner"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart"></i> 教室类型分布
+                            </div>
+                            <div class="card-body">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 教室管理页面 -->
+            <div class="page-content" id="page-classrooms">
+                <div class="filter-bar">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">楼栋</label>
+                            <select class="form-select" id="filterBuilding">
+                                <option value="">全部</option>
+                                <option value="A楼">A楼</option>
+                                <option value="B楼">B楼</option>
+                                <option value="C楼">C楼</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">类型</label>
+                            <select class="form-select" id="filterCategory">
+                                <option value="">全部</option>
+                                <option value="large">大教室</option>
+                                <option value="medium">中教室</option>
+                                <option value="small">小教室</option>
+                                <option value="ladder">阶梯教室</option>
+                                <option value="lab">实验室</option>
+                                <option value="meeting">会议室</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">最小座位数</label>
+                            <input type="number" class="form-control" id="filterMinSeats" placeholder="0">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="loadClassrooms()">
+                                <i class="bi bi-search"></i> 查询
+                            </button>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-success" onclick="showAddClassroomModal()">
+                                <i class="bi bi-plus-lg"></i> 新增教室
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>教室编号</th>
+                                <th>名称</th>
+                                <th>楼栋</th>
+                                <th>类型</th>
+                                <th>座位数</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classroomTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 课程管理页面 -->
+            <div class="page-content" id="page-courses">
+                <div class="filter-bar">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">学期</label>
+                            <select class="form-select" id="filterSemester">
+                                <option value="2024-2025-1" selected>2024-2025学年第一学期</option>
+                                <option value="2024-2025-2">2024-2025学年第二学期</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="loadCourses()">
+                                <i class="bi bi-search"></i> 查询
+                            </button>
+                        </div>
+                        <div class="col-md-7 text-end">
+                            <button class="btn btn-success" onclick="showAddCourseModal()">
+                                <i class="bi bi-plus-lg"></i> 新增课程
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>课程编号</th>
+                                <th>课程名称</th>
+                                <th>授课教师</th>
+                                <th>学分</th>
+                                <th>学时</th>
+                                <th>类型</th>
+                                <th>容量</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courseTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 排课管理页面 -->
+            <div class="page-content" id="page-schedules">
+                <div class="filter-bar">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">星期</label>
+                            <select class="form-select" id="filterWeekday">
+                                <option value="">全部</option>
+                                <option value="1">周一</option>
+                                <option value="2">周二</option>
+                                <option value="3">周三</option>
+                                <option value="4">周四</option>
+                                <option value="5">周五</option>
+                                <option value="6">周六</option>
+                                <option value="7">周日</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="loadSchedules()">
+                                <i class="bi bi-search"></i> 查询
+                            </button>
+                        </div>
+                        <div class="col-md-8 text-end">
+                            <button class="btn btn-success" onclick="showAddScheduleModal()">
+                                <i class="bi bi-plus-lg"></i> 新增排课
+                            </button>
+                            <button class="btn btn-info text-white" onclick="showScheduleSuggestion()">
+                                <i class="bi bi-lightbulb"></i> 排课建议
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>课程</th>
+                                <th>教师</th>
+                                <th>教室</th>
+                                <th>班级</th>
+                                <th>时间</th>
+                                <th>周次</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 课表查询页面 -->
+            <div class="page-content" id="page-timetable">
+                <div class="filter-bar">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">查询类型</label>
+                            <select class="form-select" id="timetableType" onchange="onTimetableTypeChange()">
+                                <option value="teacher">教师课表</option>
+                                <option value="classroom">教室课表</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">选择</label>
+                            <select class="form-select" id="timetableTarget">
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="loadTimetable()">
+                                <i class="bi bi-search"></i> 查询
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div id="timetableView"></div>
+                </div>
+            </div>
+            
+            <!-- 空闲教室查询页面 -->
+            <div class="page-content" id="page-available">
+                <div class="filter-bar">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">星期</label>
+                            <select class="form-select" id="availableWeekday" required>
+                                <option value="1">周一</option>
+                                <option value="2">周二</option>
+                                <option value="3">周三</option>
+                                <option value="4">周四</option>
+                                <option value="5">周五</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">开始节次</label>
+                            <select class="form-select" id="availableStartSection" required>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">结束节次</label>
+                            <select class="form-select" id="availableEndSection" required>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">周次</label>
+                            <input type="number" class="form-control" id="availableWeek" value="1" min="1" max="20">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">最小座位</label>
+                            <input type="number" class="form-control" id="availableMinSeats" value="0">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary" onclick="loadAvailableClassrooms()">
+                                <i class="bi bi-search"></i> 查询
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>教室编号</th>
+                                <th>名称</th>
+                                <th>楼栋</th>
+                                <th>类型</th>
+                                <th>座位数</th>
+                                <th>设备</th>
+                            </tr>
+                        </thead>
+                        <tbody id="availableTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 统计分析页面 -->
+            <div class="page-content" id="page-statistics">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart"></i> 教室利用率统计
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container" style="box-shadow: none;">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>教室编号</th>
+                                                <th>教室名称</th>
+                                                <th>类型</th>
+                                                <th>座位数</th>
+                                                <th>已用时段</th>
+                                                <th>利用率</th>
+                                                <th>利用率图示</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="utilizationTable">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新增/编辑教室模态框 -->
+    <div class="modal fade" id="classroomModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="classroomModalTitle">新增教室</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="classroomForm">
+                        <input type="hidden" id="classroomId">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">教室编号 *</label>
+                                <input type="text" class="form-control" id="classroomCode" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">教室名称 *</label>
+                                <input type="text" class="form-control" id="classroomName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">楼栋</label>
+                                <input type="text" class="form-control" id="classroomBuilding">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">楼层</label>
+                                <input type="number" class="form-control" id="classroomFloor">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">类型 *</label>
+                                <select class="form-select" id="classroomCategory" required>
+                                    <option value="large">大教室</option>
+                                    <option value="medium">中教室</option>
+                                    <option value="small">小教室</option>
+                                    <option value="ladder">阶梯教室</option>
+                                    <option value="lab">实验室</option>
+                                    <option value="meeting">会议室</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">座位数 *</label>
+                                <input type="number" class="form-control" id="classroomSeats" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">朝向</label>
+                                <select class="form-select" id="classroomOrientation">
+                                    <option value="">请选择</option>
+                                    <option value="东">东</option>
+                                    <option value="南">南</option>
+                                    <option value="西">西</option>
+                                    <option value="北">北</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">状态</label>
+                                <select class="form-select" id="classroomStatus">
+                                    <option value="available">可用</option>
+                                    <option value="maintenance">维护中</option>
+                                    <option value="disabled">停用</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">位置描述</label>
+                                <input type="text" class="form-control" id="classroomLocation">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">备注</label>
+                                <textarea class="form-control" id="classroomRemark" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClassroom()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新增排课模态框 -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新增排课</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">课程 *</label>
+                                <select class="form-select" id="scheduleCourse" required>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">教室 *</label>
+                                <select class="form-select" id="scheduleClassroom" required>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">教师 *</label>
+                                <select class="form-select" id="scheduleTeacher" required>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">班级</label>
+                                <select class="form-select" id="scheduleClass">
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">星期 *</label>
+                                <select class="form-select" id="scheduleWeekday" required>
+                                    <option value="1">周一</option>
+                                    <option value="2">周二</option>
+                                    <option value="3">周三</option>
+                                    <option value="4">周四</option>
+                                    <option value="5">周五</option>
+                                    <option value="6">周六</option>
+                                    <option value="7">周日</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">开始节次 *</label>
+                                <select class="form-select" id="scheduleStartSection" required>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">结束节次 *</label>
+                                <select class="form-select" id="scheduleEndSection" required>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">开始周 *</label>
+                                <input type="number" class="form-control" id="scheduleStartWeek" value="1" min="1" max="20" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">结束周 *</label>
+                                <input type="number" class="form-control" id="scheduleEndWeek" value="16" min="1" max="20" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">周类型</label>
+                                <select class="form-select" id="scheduleWeekType">
+                                    <option value="all">全部周</option>
+                                    <option value="odd">单周</option>
+                                    <option value="even">双周</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSchedule()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
