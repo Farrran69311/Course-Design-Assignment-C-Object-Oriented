@@ -69,7 +69,7 @@
         [data-theme="dark"] .card-header {
             background: transparent;
             border-color: var(--border-color);
-            color: var(--text-primary);
+            color: #e0e0e0 !important;
         }
         
         [data-theme="dark"] .table thead th {
@@ -303,8 +303,19 @@
         }
         
         /* 深色模式：卡片头部 */
+        [data-theme="dark"] .card-header,
         [data-theme="dark"] .card-header span,
-        [data-theme="dark"] .card-header i {
+        [data-theme="dark"] .card-header i,
+        [data-theme="dark"] .card-title {
+            color: #e0e0e0 !important;
+        }
+        
+        /* 深色模式：卡片内容 */
+        [data-theme="dark"] .card-body,
+        [data-theme="dark"] .card-text,
+        [data-theme="dark"] .card-body p,
+        [data-theme="dark"] .card-body span,
+        [data-theme="dark"] .card-body div {
             color: #e0e0e0;
         }
         
