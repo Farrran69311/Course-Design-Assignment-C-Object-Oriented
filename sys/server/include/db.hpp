@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <mysql.h>
 
 // 数据库结果行
@@ -48,6 +49,14 @@ private:
     
     MYSQL* conn_;
     bool connected_;
+    mutable std::mutex mutex_;  // 线程安全锁
+    
+    // 保存连接参数用于重连
+    std::string host_;
+    std::string user_;
+    std::string password_;
+    std::string database_;
+    unsigned int port_;
 };
 
 #endif // DB_HPP

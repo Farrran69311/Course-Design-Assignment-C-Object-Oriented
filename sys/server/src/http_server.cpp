@@ -245,52 +245,66 @@ void HttpServer::serveStaticFile(const std::string& path, HttpResponse& res) {
 }
 
 void HttpServer::handleClient(int clientFd) {
-    char buffer[8192] = {0};
-    ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+    try {
+        char buffer[8192] = {0};
+        ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
     
-    if (bytesRead <= 0) {
-        close(clientFd);
-        return;
-    }
-    
-    HttpRequest req = parseRequest(buffer);
-    HttpResponse res;
-    
-    // OPTIONS请求（CORS预检）
-    if (req.method == "OPTIONS") {
-        res.statusCode = 204;
+        if (bytesRead <= 0) {
+            close(clientFd);
+            return;
+        }
+        
+        HttpRequest req = parseRequest(buffer);
+        HttpResponse res;
+        
+        // OPTIONS请求（CORS预检）
+        if (req.method == "OPTIONS") {
+            res.statusCode = 204;
+            std::string response = res.toString();
+            send(clientFd, response.c_str(), response.size(), 0);
+            close(clientFd);
+            return;
+        }
+        
+        // 查找路由
+        bool found = false;
+        if (routes_.count(req.method)) {
+            for (const auto& [pattern, handler] : routes_[req.method]) {
+                if (matchRoute(pattern, req.path, req)) {
+                    try {
+                        handler(req, res);
+                    } catch (const std::exception& e) {
+                        std::cerr << "Handler error: " << e.what() << std::endl;
+                        res.setStatus(500);
+                        res.setJson("{\"error\": \"服务器内部错误\"}");
+                    }
+                    found = true;
+                    break;
+                }
+            }
+        }
+        
+        // 未找到路由，尝试静态文件
+        if (!found && !staticDir_.empty() && req.method == "GET") {
+            serveStaticFile(req.path, res);
+            found = true;
+        }
+        
+        if (!found) {
+            res.setStatus(404, "{\"error\": \"Not Found\"}");
+            res.headers["Content-Type"] = "application/json";
+        }
+        
         std::string response = res.toString();
         send(clientFd, response.c_str(), response.size(), 0);
         close(clientFd);
-        return;
+    } catch (const std::exception& e) {
+        std::cerr << "Client handling error: " << e.what() << std::endl;
+        close(clientFd);
+    } catch (...) {
+        std::cerr << "Unknown error in client handling" << std::endl;
+        close(clientFd);
     }
-    
-    // 查找路由
-    bool found = false;
-    if (routes_.count(req.method)) {
-        for (const auto& [pattern, handler] : routes_[req.method]) {
-            if (matchRoute(pattern, req.path, req)) {
-                handler(req, res);
-                found = true;
-                break;
-            }
-        }
-    }
-    
-    // 未找到路由，尝试静态文件
-    if (!found && !staticDir_.empty() && req.method == "GET") {
-        serveStaticFile(req.path, res);
-        found = true;
-    }
-    
-    if (!found) {
-        res.setStatus(404, "{\"error\": \"Not Found\"}");
-        res.headers["Content-Type"] = "application/json";
-    }
-    
-    std::string response = res.toString();
-    send(clientFd, response.c_str(), response.size(), 0);
-    close(clientFd);
 }
 
 void HttpServer::start() {
