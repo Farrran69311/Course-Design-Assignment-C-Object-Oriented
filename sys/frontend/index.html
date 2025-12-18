@@ -8,10 +8,396 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4a90d9;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --sidebar-width: 250px;
+            --primary-color: #5c6bc0;
+            --primary-light: #8e99f3;
+            --primary-dark: #26418f;
+            --secondary-color: #78909c;
+            --success-color: #66bb6a;
+            --warning-color: #ffb74d;
+            --danger-color: #ef5350;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.15);
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+            
+            /* 亮色主题变量 */
+            --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            --bg-card: #ffffff;
+            --bg-card-hover: #fafbfc;
+            --text-primary: #1a1f36;
+            --text-secondary: #5f6368;
+            --text-muted: #999;
+            --border-color: #f0f0f0;
+            --table-header-bg: linear-gradient(180deg, #f8f9fa, #f1f3f4);
+        }
+        
+        /* ===== 深色主题 ===== */
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-card: #1e2746;
+            --bg-card-hover: #263354;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --text-muted: #8a8d91;
+            --border-color: #3a3f5c;
+            --table-header-bg: linear-gradient(180deg, #252d44, #1e2746);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary);
+        }
+        
+        [data-theme="dark"] .content-area {
+            background: var(--bg-primary);
+        }
+        
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .table-container,
+        [data-theme="dark"] .filter-bar,
+        [data-theme="dark"] .top-bar {
+            background: var(--bg-card) !important;
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .card-header {
+            background: transparent;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .table thead th {
+            background: var(--table-header-bg);
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .table tbody td {
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .table tbody tr:hover {
+            background: rgba(92, 107, 192, 0.1);
+        }
+        
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background: #252d44;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background: #2d3654;
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .page-title {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .stat-card {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .modal-header,
+        [data-theme="dark"] .modal-footer {
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .dropdown-menu {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .dropdown-item {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .dropdown-item:hover {
+            background: var(--bg-card-hover);
+        }
+        
+        [data-theme="dark"] .pagination-container {
+            background: var(--table-header-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .pagination .page-link {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] #currentTime {
+            background: rgba(92, 107, 192, 0.2);
+        }
+        
+        [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* ===== 快捷搜索和主题切换 ===== */
+        .quick-search-btn,
+        .theme-toggle-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .quick-search-btn:hover,
+        .theme-toggle-btn:hover {
+            background: #f5f5f5;
+            border-color: #d0d0d0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .quick-search-btn kbd,
+        .theme-toggle-btn kbd {
+            background: #f0f0f0;
+            border: 1px solid #d0d0d0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        [data-theme="dark"] .quick-search-btn,
+        [data-theme="dark"] .theme-toggle-btn {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .quick-search-btn:hover,
+        [data-theme="dark"] .theme-toggle-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: #5c6bc0;
+        }
+
+        [data-theme="dark"] .quick-search-btn kbd,
+        [data-theme="dark"] .theme-toggle-btn kbd {
+            background: rgba(92, 107, 192, 0.1);
+            border-color: rgba(92, 107, 192, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* ===== 快捷搜索模态框 ===== */
+        .quick-search-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quick-search-overlay.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            opacity: 1;
+            padding-top: 100px;
+        }
+
+        .quick-search-modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideDown 0.3s ease;
+        }
+
+        [data-theme="dark"] .quick-search-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .quick-search-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f9f9f9;
+        }
+
+        [data-theme="dark"] .quick-search-header {
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+        }
+
+        .quick-search-header i {
+            color: #999;
+            font-size: 18px;
+        }
+
+        .quick-search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #333;
+        }
+
+        [data-theme="dark"] .quick-search-input {
+            color: var(--text-primary);
+        }
+
+        .quick-search-header kbd {
+            background: #e0e0e0;
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        [data-theme="dark"] .quick-search-header kbd {
+            background: rgba(92, 107, 192, 0.2);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .quick-search-results {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+
+        .search-section {
+            padding: 0;
+        }
+
+        .search-section-title {
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="dark"] .search-section-title {
+            color: var(--text-muted);
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #333;
+        }
+
+        [data-theme="dark"] .search-item {
+            color: var(--text-primary);
+        }
+
+        .search-item:hover {
+            background: #f0f0f0;
+        }
+
+        [data-theme="dark"] .search-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .search-item.selected {
+            background: #e3f2fd;
+            border-left: 3px solid #5c6bc0;
+            padding-left: 17px;
+        }
+
+        [data-theme="dark"] .search-item.selected {
+            background: rgba(92, 107, 192, 0.15);
+            border-left-color: #5c6bc0;
+        }
+
+        .search-item i {
+            font-size: 18px;
+            width: 24px;
+            color: #5c6bc0;
+        }
+
+        .search-item span {
+            flex: 1;
+        }
+
+        .search-item-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        [data-theme="dark"] .search-item-meta {
+            color: var(--text-muted);
+        }
+
+        .quick-search-footer {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            justify-content: center;
+            padding: 12px 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            font-size: 12px;
+            color: #999;
+        }
+
+        [data-theme="dark"] .quick-search-footer {
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .quick-search-footer kbd {
+            background: #e0e0e0;
+            border: 1px solid #ccc;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        [data-theme="dark"] .quick-search-footer kbd {
+            background: rgba(92, 107, 192, 0.2);
+            border-color: var(--border-color);
+            color: var(--text-primary);
         }
         
         * {
@@ -21,149 +407,495 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
-        /* 登录页面 */
+        /* ===== 全局动画 ===== */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        
+        @keyframes rippleEffect {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== 登录页面 ===== */
         .login-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #5c6bc0, #8e99f3);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='2' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+            background-size: 50px 50px;
+            animation: moveStars 100s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes moveStars {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-50%, -50%); }
         }
         
         .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius-lg);
+            padding: 50px 40px;
+            width: 420px;
+            box-shadow: var(--shadow-lg), 0 0 40px rgba(102, 126, 234, 0.3);
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 1;
         }
         
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            border-radius: calc(var(--border-radius-lg) + 2px);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .login-card:hover::before {
+            opacity: 1;
         }
         
         .login-card h2 {
             text-align: center;
-            color: #333;
-            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 35px;
+            font-weight: 700;
+            font-size: 28px;
+        }
+        
+        .login-card h2 i {
+            display: block;
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+            -webkit-text-fill-color: #667eea;
         }
         
         .login-card .form-control {
-            border-radius: 10px;
-            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            padding: 14px 18px;
             margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            font-size: 15px;
+            transition: all var(--transition-normal);
+            background: #fafafa;
+        }
+        
+        .login-card .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(92, 107, 192, 0.15);
+            background: white;
+            transform: translateY(-2px);
         }
         
         .login-card .btn-login {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: var(--border-radius);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             font-size: 16px;
             font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 1px;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
         
         .login-card .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
         
-        /* 主布局 */
+        .login-card .btn-login:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .login-card .btn-login:active {
+            transform: translateY(-1px);
+        }
+        
+        /* 登录输入框图标样式 */
+        .input-group-custom {
+            position: relative;
+        }
+        
+        .input-group-custom i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 16px;
+            transition: all var(--transition-normal);
+            z-index: 2;
+        }
+        
+        .input-group-custom .form-control {
+            padding-left: 45px;
+        }
+        
+        .input-group-custom .form-control:focus + i,
+        .input-group-custom:focus-within i {
+            color: var(--primary-color);
+        }
+        
+        /* 星星动画 */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .stars::before,
+        .stars::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 
+                50px 100px white, 150px 50px white, 250px 150px white,
+                350px 80px white, 450px 180px white, 100px 250px white,
+                200px 300px white, 300px 200px white, 400px 100px white,
+                500px 250px white, 550px 50px white, 600px 150px white,
+                50px 350px white, 150px 400px white, 250px 380px white,
+                350px 450px white, 450px 350px white, 550px 420px white;
+            animation: moveStars 100s linear infinite;
+        }
+        
+        .stars::after {
+            transform: translateX(200px);
+            animation-duration: 150s;
+            opacity: 0.5;
+        }
+        
+        /* ===== 主布局 ===== */
         .main-container {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
         
+        /* ===== 侧边栏 ===== */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            height: 100dvh; /* 动态视口高度，更好支持移动端 */
+            background: linear-gradient(180deg, #1a1f36 0%, #121621 100%);
             color: white;
-            padding-top: 20px;
+            padding-top: 0;
             z-index: 1000;
-            transition: transform 0.3s ease;
+            transition: all var(--transition-normal);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
         }
         
         .sidebar-header {
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
+            background: linear-gradient(135deg, rgba(92, 107, 192, 0.3), rgba(118, 75, 162, 0.3));
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
         }
         
         .sidebar-header h4 {
             margin: 0;
             font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sidebar-header h4 i {
+            color: var(--primary-light);
+            margin-right: 10px;
+            font-size: 22px;
         }
         
         .sidebar-header small {
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            display: block;
+            margin-top: 6px;
         }
         
         .nav-menu {
-            padding: 20px 0;
+            padding: 15px 0;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+        
+        .nav-menu:hover {
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+        }
+        
+        .nav-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .nav-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .nav-menu::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+        
+        .nav-menu:hover::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
         }
         
         .nav-item {
-            padding: 12px 25px;
+            padding: 14px 25px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
+            gap: 14px;
+            transition: all var(--transition-normal);
             border-left: 3px solid transparent;
+            position: relative;
+            margin: 2px 10px;
+            border-radius: 10px;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 60%;
+            background: var(--primary-color);
+            transform: translateY(-50%);
+            transition: width var(--transition-normal);
+            border-radius: 0 4px 4px 0;
         }
         
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
+        }
+        
+        .nav-item:hover i {
+            transform: scale(1.2);
+            color: var(--primary-light);
         }
         
         .nav-item.active {
-            background: rgba(74, 144, 217, 0.3);
-            border-left-color: var(--primary-color);
+            background: linear-gradient(90deg, rgba(92, 107, 192, 0.3), transparent);
+            border-left-color: transparent;
+        }
+        
+        .nav-item.active::before {
+            width: 4px;
+        }
+        
+        .nav-item.active i {
+            color: var(--primary-light);
         }
         
         .nav-item i {
-            font-size: 18px;
+            font-size: 20px;
+            transition: all var(--transition-normal);
+            width: 24px;
+            text-align: center;
         }
         
+        .nav-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* ===== 内容区域 ===== */
         .content-area {
             margin-left: var(--sidebar-width);
-            padding: 20px;
+            padding: 25px;
             min-height: 100vh;
+            min-height: 100dvh;
+            transition: margin-left var(--transition-normal);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            position: relative;
         }
         
         .top-bar {
             background: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 18px 28px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-sm);
+            animation: slideDown 0.4s ease;
+            position: sticky;
+            top: 25px;
+            z-index: 100;
         }
         
         .page-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1f36;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .page-title:hover::after {
+            width: 100%;
         }
         
         .user-info {
@@ -172,97 +904,164 @@
             gap: 15px;
         }
         
+        #userRole {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(92, 107, 192, 0.4);
+            transition: transform var(--transition-normal);
+            cursor: pointer;
         }
         
-        /* 卡片样式 */
+        .user-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* ===== 卡片样式 ===== */
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            background: white;
+            overflow: hidden;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
         }
         
         .card-header {
             background: transparent;
-            border-bottom: 1px solid #eee;
-            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 18px 22px;
             font-weight: 600;
+            font-size: 15px;
+            color: #1a1f36;
         }
         
-        /* 统计卡片 */
+        .card-header i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .card-body {
+            padding: 22px;
+        }
+        
+        /* ===== 统计卡片 ===== */
         .stat-card {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #357abd 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: var(--border-radius);
+            padding: 28px;
             position: relative;
             overflow: hidden;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(92, 107, 192, 0.4);
+        }
+        
+        .stat-card:hover::before {
+            transform: translate(20%, 20%);
+        }
+        
+        .stat-card:hover h3 {
+            transform: scale(1.1);
         }
         
         .stat-card.green {
-            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+        }
+        
+        .stat-card.green:hover {
+            box-shadow: 0 15px 40px rgba(102, 187, 106, 0.4);
         }
         
         .stat-card.orange {
-            background: linear-gradient(135deg, #fd7e14 0%, #dc6502 100%);
+            background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
+        }
+        
+        .stat-card.orange:hover {
+            box-shadow: 0 15px 40px rgba(255, 183, 77, 0.4);
         }
         
         .stat-card.purple {
-            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            background: linear-gradient(135deg, #ab47bc 0%, #7b1fa2 100%);
+        }
+        
+        .stat-card.purple:hover {
+            box-shadow: 0 15px 40px rgba(171, 71, 188, 0.4);
         }
         
         .stat-card h3 {
-            font-size: 36px;
+            font-size: 42px;
             margin-bottom: 5px;
+            font-weight: 700;
+            transition: transform var(--transition-normal);
         }
         
         .stat-card p {
             margin: 0;
             opacity: 0.9;
+            font-size: 14px;
+            font-weight: 500;
         }
         
-        .stat-card i {
+        .stat-card > i {
             position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 60px;
-            opacity: 0.2;
+            font-size: 70px;
+            opacity: 0.15;
+            transition: all var(--transition-normal);
         }
         
-        /* 表格样式 */
+        .stat-card:hover > i {
+            opacity: 0.25;
+            transform: translateY(-50%) scale(1.1) rotate(-10deg);
+        }
+        
+        /* ===== 表格样式 ===== */
         .table-container {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            padding: 0;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
         }
         
         .table {
@@ -270,100 +1069,181 @@
         }
         
         .table thead th {
-            border-bottom: 2px solid #eee;
-            color: #666;
+            border-bottom: none;
+            background: linear-gradient(180deg, #f8f9fa, #f1f3f4);
+            color: #5f6368;
             font-weight: 600;
-            padding: 15px;
+            padding: 16px 18px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .table tbody td {
-            padding: 15px;
+            padding: 16px 18px;
             vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background var(--transition-fast);
         }
         
         .table tbody tr {
-            transition: background 0.2s;
+            transition: all var(--transition-fast);
         }
         
         .table tbody tr:hover {
-            background: #f8f9fa;
+            background: linear-gradient(90deg, rgba(92, 107, 192, 0.05), transparent);
         }
         
-        /* 按钮样式 */
-        .btn-primary {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
+        .table tbody tr:hover td:first-child {
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        /* ===== 按钮样式 ===== */
+        .btn {
             border-radius: 8px;
-            padding: 8px 20px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:active::after {
+            animation: ripple 0.5s ease-out;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            box-shadow: 0 4px 15px rgba(92, 107, 192, 0.3);
         }
         
         .btn-primary:hover {
-            background: #357abd;
-            border-color: #357abd;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 107, 192, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #4caf50);
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #81c784, var(--success-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 187, 106, 0.4);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
         }
         
         .btn-action {
-            padding: 5px 10px;
-            border-radius: 6px;
-            margin: 0 2px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin: 0 3px;
+            transition: all var(--transition-fast);
         }
         
-        /* 状态徽章 */
-        .badge-status {
+        .btn-action:hover {
+            transform: scale(1.15);
+        }
+        
+        /* ===== 状态徽章 ===== */
+        .badge {
             padding: 6px 12px;
             border-radius: 20px;
             font-weight: 500;
+            font-size: 12px;
+            letter-spacing: 0.3px;
         }
         
-        .badge-available {
-            background: #d4edda;
-            color: #155724;
+        .badge-status {
+            padding: 8px 16px;
         }
         
-        .badge-maintenance {
-            background: #fff3cd;
-            color: #856404;
+        .badge-available, .bg-success {
+            background: linear-gradient(135deg, #66bb6a, #4caf50) !important;
         }
         
-        .badge-disabled {
-            background: #f8d7da;
-            color: #721c24;
+        .badge-maintenance, .bg-warning {
+            background: linear-gradient(135deg, #ffb74d, #ffa726) !important;
+            color: #333 !important;
         }
         
-        /* 课表视图 */
+        .badge-disabled, .bg-danger {
+            background: linear-gradient(135deg, #ef5350, #e53935) !important;
+        }
+        
+        /* ===== 课表视图 ===== */
         .timetable {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 4px;
         }
         
         .timetable th, .timetable td {
-            border: 1px solid #dee2e6;
-            padding: 8px;
+            border: none;
+            padding: 10px;
             text-align: center;
             min-width: 120px;
+            border-radius: 8px;
         }
         
         .timetable th {
-            background: #f8f9fa;
+            background: linear-gradient(180deg, #f8f9fa, #f1f3f4);
+            font-weight: 600;
+            color: #5f6368;
         }
         
         .timetable .time-cell {
-            background: #f8f9fa;
-            font-weight: 500;
+            background: linear-gradient(180deg, #f8f9fa, #f1f3f4);
+            font-weight: 600;
             width: 80px;
+            color: #5f6368;
         }
         
         .timetable .course-cell {
-            background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: white;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 10px;
+            padding: 12px;
             font-size: 12px;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .timetable .course-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(92, 107, 192, 0.4);
         }
         
         .timetable .course-cell .course-name {
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
         
         .timetable .course-cell .course-info {
@@ -371,72 +1251,240 @@
             font-size: 11px;
         }
         
-        /* 模态框 */
+        /* ===== 模态框 ===== */
         .modal-content {
-            border-radius: 15px;
+            border-radius: var(--border-radius-lg);
             border: none;
+            box-shadow: var(--shadow-lg);
+            animation: scaleIn 0.3s ease;
         }
         
         .modal-header {
-            border-bottom: 1px solid #eee;
-            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 22px 28px;
+            background: linear-gradient(180deg, #fafafa, white);
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            color: #1a1f36;
         }
         
         .modal-body {
-            padding: 25px;
+            padding: 28px;
         }
         
         .modal-footer {
-            border-top: 1px solid #eee;
-            padding: 15px 20px;
+            border-top: 1px solid #f0f0f0;
+            padding: 18px 28px;
+            background: #fafafa;
         }
         
-        /* 筛选器 */
+        .modal.show .modal-dialog {
+            animation: slideUp 0.3s ease;
+        }
+        
+        /* ===== 表单控件 ===== */
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            transition: all var(--transition-normal);
+            font-size: 14px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(92, 107, 192, 0.1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #5f6368;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        /* ===== 筛选器 ===== */
         .filter-bar {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 22px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            animation: slideDown 0.4s ease;
         }
         
-        .filter-bar .form-control, .filter-bar .form-select {
-            border-radius: 8px;
-        }
-        
-        /* 加载动画 */
+        /* ===== 加载动画 ===== */
         .loading {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            padding: 60px;
+            gap: 15px;
         }
         
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .loading-text {
+            color: #888;
+            font-size: 14px;
+            animation: pulse 1.5s ease infinite;
         }
         
-        /* 页面切换动画 */
+        /* ===== 全局加载覆盖层 ===== */
+        #globalLoading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        #globalLoading.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        #globalLoading .spinner {
+            width: 60px;
+            height: 60px;
+            border-width: 5px;
+        }
+        
+        /* ===== 页面切换动画 ===== */
         .page-content {
             display: none;
-            animation: fadeIn 0.3s ease-out;
+            opacity: 0;
         }
         
         .page-content.active {
             display: block;
+            animation: slideUp 0.4s ease forwards;
         }
         
-        /* 响应式 */
+        /* 交错动画 */
+        .page-content.active .card,
+        .page-content.active .stat-card {
+            opacity: 0;
+            animation: slideUp 0.5s ease forwards;
+        }
+        
+        .page-content.active .row > *:nth-child(1) .card,
+        .page-content.active .row > *:nth-child(1) .stat-card { animation-delay: 0.1s; }
+        .page-content.active .row > *:nth-child(2) .card,
+        .page-content.active .row > *:nth-child(2) .stat-card { animation-delay: 0.2s; }
+        .page-content.active .row > *:nth-child(3) .card,
+        .page-content.active .row > *:nth-child(3) .stat-card { animation-delay: 0.3s; }
+        .page-content.active .row > *:nth-child(4) .card,
+        .page-content.active .row > *:nth-child(4) .stat-card { animation-delay: 0.4s; }
+        
+        /* ===== 权限控制 ===== */
+        .admin-only, .student-only, .teacher-only {
+            display: none;
+        }
+        
+        body.role-admin .admin-only {
+            display: inline-block;
+        }
+        
+        body.role-student .student-only {
+            display: inline-block;
+        }
+        
+        body.role-teacher .teacher-only {
+            display: inline-block;
+        }
+        
+        .nav-item.admin-only, .nav-item.student-only, .nav-item.teacher-only {
+            display: none;
+        }
+        
+        body.role-admin .nav-item.admin-only {
+            display: flex;
+        }
+        
+        body.role-student .nav-item.student-only {
+            display: flex;
+        }
+        
+        body.role-teacher .nav-item.teacher-only {
+            display: flex;
+        }
+        
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #c1c1c1, #a1a1a1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a1a1a1, #818181);
+        }
+        
+        /* ===== 提示框美化 ===== */
+        .alert {
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-md);
+            animation: slideRight 0.3s ease;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            color: white;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ef5350, #e53935);
+            color: white;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #ffb74d, #ffa726);
+            color: #333;
+        }
+        
+        /* ===== 进度条美化 ===== */
+        .progress {
+            border-radius: 10px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+        
+        /* ===== 响应式 ===== */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -449,27 +1497,809 @@
             .content-area {
                 margin-left: 0;
             }
+            
+            .stat-card h3 {
+                font-size: 32px;
+            }
+        }
+        
+        /* ===== 打印优化 ===== */
+        @media print {
+            .sidebar, .top-bar, .filter-bar, .btn {
+                display: none !important;
+            }
+            
+            .content-area {
+                margin-left: 0 !important;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+        
+        /* ===== 工具提示 ===== */
+        .tooltip-custom {
+            position: relative;
+        }
+        
+        .tooltip-custom::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: #1a1f36;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .tooltip-custom:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* ===== 骨架屏加载 ===== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-text {
+            height: 16px;
+            margin: 8px 0;
+        }
+        
+        .skeleton-title {
+            height: 24px;
+            width: 60%;
+            margin: 12px 0;
+        }
+        
+        .skeleton-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        
+        /* ===== 空状态 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .empty-state h5 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+        }
+        
+        /* ===== 悬浮操作按钮 ===== */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 6px 20px rgba(92, 107, 192, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 30px rgba(92, 107, 192, 0.5);
+        }
+        
+        /* ===== 数据卡片网格 ===== */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ===== 加载中的按钮 ===== */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin: -8px 0 0 -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        /* ===== 卡片内容动画 ===== */
+        .card-body {
+            transition: opacity 0.3s ease;
+        }
+        
+        .card.loading .card-body {
+            opacity: 0.5;
+        }
+        
+        /* ===== 选项卡美化 ===== */
+        .nav-tabs {
+            border-bottom: 2px solid #e8e8e8;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            padding: 12px 24px;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-tabs .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .nav-tabs .nav-link.active::after {
+            width: 100%;
+        }
+        
+        /* ===== 分页美化 ===== */
+        .pagination {
+            gap: 5px;
+        }
+        
+        .page-link {
+            border: none;
+            border-radius: 8px !important;
+            padding: 10px 16px;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+        
+        .page-link:hover {
+            background: #f0f0f0;
+            color: var(--primary-color);
+        }
+        
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(92, 107, 192, 0.3);
+        }
+        
+        /* ===== 下拉菜单美化 ===== */
+        .dropdown-menu {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 8px;
+            margin-top: 10px !important;
+            transform-origin: top right;
+            animation: dropdownFadeIn 0.2s ease forwards;
+        }
+        
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(92, 107, 192, 0.1), rgba(92, 107, 192, 0.05));
+            color: var(--primary-color);
+            transform: translateX(3px);
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        /* 用户信息下拉触发器 */
+        .user-info .dropdown-toggle::after {
+            display: none;
+        }
+        
+        .user-info > div {
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .user-info > div:hover {
+            background: rgba(92, 107, 192, 0.08);
+        }
+        
+        /* ===== 页面标题动效 ===== */
+        .page-title {
+            animation: titleSlideIn 0.5s ease forwards;
+        }
+        
+        @keyframes titleSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .page-title.changing {
+            animation: titleChange 0.4s ease;
+        }
+        
+        @keyframes titleChange {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            50% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ===== 顶部栏时间徽章 ===== */
+        #currentTime {
+            background: linear-gradient(135deg, #f0f2ff, #e8ebff);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* ===== 通知红点 ===== */
+        .notification-badge {
+            position: relative;
+        }
+        
+        .notification-badge::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: #ef5350;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+        
+        /* ===== 侧边栏退出按钮 ===== */
+        .nav-item.logout-btn {
+            margin: 15px 10px;
+            margin-top: auto;
+            width: auto;
+            background: rgba(239, 83, 80, 0.1);
+            border: 1px solid rgba(239, 83, 80, 0.2);
+            flex-shrink: 0;
+        }
+        
+        .nav-item.logout-btn:hover {
+            background: rgba(239, 83, 80, 0.2);
+            border-color: rgba(239, 83, 80, 0.3);
+        }
+        
+        .nav-item.logout-btn i {
+            color: #ef5350;
+        }
+        
+        .nav-item.logout-btn span {
+            color: #ef5350;
+        }
+        
+        /* ===== 用户下拉触发器 ===== */
+        .user-dropdown-trigger {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .user-dropdown-trigger:hover {
+            background: rgba(92, 107, 192, 0.08);
+        }
+        
+        .user-dropdown-trigger:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-arrow {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+        }
+        
+        /* ===== 下拉菜单头部 ===== */
+        .dropdown-header {
+            background: linear-gradient(135deg, rgba(92, 107, 192, 0.05), rgba(92, 107, 192, 0.02));
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .user-avatar-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* ===== 退出登录菜单项 ===== */
+        .logout-item:hover {
+            background: rgba(239, 83, 80, 0.1) !important;
+        }
+        
+        /* ===== 更好的下拉菜单阴影 ===== */
+        .dropdown-menu.shadow-lg {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* ===== 分页组件样式 ===== */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(180deg, #fafbfc, #f8f9fa);
+            border-top: 1px solid #f0f0f0;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        .pagination {
+            margin: 0;
+            gap: 6px;
+        }
+        
+        .pagination .page-item .page-link {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            color: #5f6368;
+            font-weight: 500;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+            min-width: 44px;
+            text-align: center;
+        }
+        
+        .pagination .page-item .page-link:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 107, 192, 0.3);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(92, 107, 192, 0.4);
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            background: #f5f5f5;
+            color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .pagination .page-link i {
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+            margin-left: 20px;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        
+        /* ===== 美化的操作按钮组 ===== */
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
+        
+        .action-buttons .btn-action {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-buttons .btn-action i {
+            font-size: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .action-buttons .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .action-buttons .btn-action:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .action-buttons .btn-action:active {
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        /* 查看详情按钮 */
+        .btn-action-view {
+            background: linear-gradient(135deg, #4fc3f7, #0288d1);
+            color: white !important;
+        }
+        
+        .btn-action-view:hover {
+            background: linear-gradient(135deg, #81d4fa, #29b6f6);
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(2, 136, 209, 0.4) !important;
+        }
+        
+        /* 编辑按钮 */
+        .btn-action-edit {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            color: white !important;
+        }
+        
+        .btn-action-edit:hover {
+            background: linear-gradient(135deg, #a5b4fc, var(--primary-light));
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(92, 107, 192, 0.4) !important;
+        }
+        
+        /* 删除按钮 */
+        .btn-action-delete {
+            background: linear-gradient(135deg, #ef5350, #c62828);
+            color: white !important;
+        }
+        
+        .btn-action-delete:hover {
+            background: linear-gradient(135deg, #ff8a80, #ef5350);
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(198, 40, 40, 0.4) !important;
+        }
+        
+        /* 通过/同意按钮 */
+        .btn-action-approve {
+            background: linear-gradient(135deg, #66bb6a, #2e7d32);
+            color: white !important;
+        }
+        
+        .btn-action-approve:hover {
+            background: linear-gradient(135deg, #a5d6a7, #66bb6a);
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4) !important;
+        }
+        
+        /* 拒绝按钮 */
+        .btn-action-reject {
+            background: linear-gradient(135deg, #ff7043, #d84315);
+            color: white !important;
+        }
+        
+        .btn-action-reject:hover {
+            background: linear-gradient(135deg, #ffab91, #ff7043);
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(216, 67, 21, 0.4) !important;
+        }
+        
+        /* 重置密码按钮 */
+        .btn-action-reset {
+            background: linear-gradient(135deg, #ffca28, #f9a825);
+            color: #333 !important;
+        }
+        
+        .btn-action-reset:hover {
+            background: linear-gradient(135deg, #ffe082, #ffca28);
+            color: #333 !important;
+            box-shadow: 0 6px 20px rgba(249, 168, 37, 0.4) !important;
+        }
+        
+        /* 按钮工具提示 */
+        .btn-action[data-tooltip] {
+            position: relative;
+        }
+        
+        .btn-action[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            background: #333;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .btn-action[data-tooltip]::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 3px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            border: 5px solid transparent;
+            border-top-color: #333;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action[data-tooltip]:hover::after,
+        .btn-action[data-tooltip]:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+        
+        /* ===== 表格行动画 ===== */
+        @keyframes tableRowFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .table-row-animate {
+            animation: tableRowFadeIn 0.4s ease forwards;
+        }
+        
+        /* 表格行悬停效果增强 */
+        .table tbody tr {
+            position: relative;
+        }
+        
+        .table tbody tr::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .table tbody tr:hover::after {
+            transform: scaleX(1);
+        }
+        
+        /* ===== 确认弹窗美化 ===== */
+        .confirm-modal .modal-content {
+            border-radius: 16px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .confirm-modal .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .confirm-modal .modal-body {
+            text-align: center;
+            padding: 30px 40px;
+        }
+        
+        .confirm-modal .confirm-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            animation: scaleIn 0.4s ease;
+        }
+        
+        .confirm-modal .confirm-icon.warning {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #f57c00;
+        }
+        
+        .confirm-modal .confirm-icon.danger {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            color: #c62828;
+        }
+        
+        .confirm-modal .confirm-icon.info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1976d2;
+        }
+        
+        .confirm-modal .modal-footer {
+            border-top: none;
+            justify-content: center;
+            gap: 12px;
+            padding: 0 40px 30px;
+        }
+        
+        .confirm-modal .modal-footer .btn {
+            min-width: 100px;
+            padding: 12px 24px;
+        }
+        
+        /* ===== 空数据状态 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
         }
     </style>
 </head>
 <body>
+    <!-- 全局加载层 -->
+    <div id="globalLoading">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">加载中...</div>
+    </div>
+    
     <!-- 登录页面 -->
     <div class="login-container" id="loginPage">
         <div class="login-card">
             <h2><i class="bi bi-building"></i> 教室资源管理系统</h2>
+            <p class="text-muted mb-4">智能校园管理平台</p>
             <form id="loginForm">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="username" placeholder="用户名" value="admin">
+                <div class="mb-3 input-group-custom">
+                    <i class="bi bi-person"></i>
+                    <input type="text" class="form-control" id="username" placeholder="请输入用户名" value="admin">
                 </div>
-                <div class="mb-3">
-                    <input type="password" class="form-control" id="password" placeholder="密码" value="admin123">
+                <div class="mb-3 input-group-custom">
+                    <i class="bi bi-lock"></i>
+                    <input type="password" class="form-control" id="password" placeholder="请输入密码" value="123456">
                 </div>
-                <button type="submit" class="btn btn-primary btn-login">登 录</button>
+                <button type="submit" class="btn btn-primary btn-login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>登 录
+                </button>
             </form>
-            <div class="text-center mt-3 text-muted small">
-                默认管理员: admin / admin123
+            <div class="text-center mt-4 text-muted small">
+                <i class="bi bi-info-circle me-1"></i> 默认账号: admin / 123456
             </div>
         </div>
+        <div class="stars"></div>
     </div>
     
     <!-- 主界面 -->
@@ -477,8 +2307,8 @@
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h4><i class="bi bi-building"></i> 教室管理系统</h4>
-                <small id="currentUser">管理员</small>
+                <h4><i class="bi bi-building"></i>教室资源管理</h4>
+                <small id="sidebarUserName">管理员</small>
             </div>
             <div class="nav-menu">
                 <div class="nav-item active" data-page="dashboard">
@@ -505,12 +2335,36 @@
                     <i class="bi bi-search"></i>
                     <span>空闲教室</span>
                 </div>
+                <div class="nav-item" data-page="equipment">
+                    <i class="bi bi-display"></i>
+                    <span>设备管理</span>
+                </div>
+                <div class="nav-item" data-page="classes">
+                    <i class="bi bi-people"></i>
+                    <span>班级管理</span>
+                </div>
+                <div class="nav-item" data-page="bookings">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>教室预约</span>
+                </div>
+                <div class="nav-item student-only" data-page="enrollment">
+                    <i class="bi bi-journal-check"></i>
+                    <span>学生选课</span>
+                </div>
+                <div class="nav-item" data-page="notices">
+                    <i class="bi bi-megaphone"></i>
+                    <span>通知公告</span>
+                </div>
                 <div class="nav-item" data-page="statistics">
                     <i class="bi bi-bar-chart"></i>
                     <span>统计分析</span>
                 </div>
+                <div class="nav-item admin-only" data-page="users">
+                    <i class="bi bi-person-gear"></i>
+                    <span>用户管理</span>
+                </div>
             </div>
-            <div class="nav-item" style="position: absolute; bottom: 20px; width: 100%;" onclick="logout()">
+            <div class="nav-item logout-btn" onclick="logout()">
                 <i class="bi bi-box-arrow-left"></i>
                 <span>退出登录</span>
             </div>
@@ -519,10 +2373,48 @@
         <!-- 内容区域 -->
         <div class="content-area">
             <div class="top-bar">
-                <h1 class="page-title" id="pageTitle">仪表盘</h1>
-                <div class="user-info">
-                    <span id="userRole">管理员</span>
-                    <div class="user-avatar" id="userAvatar">A</div>
+                <div class="d-flex align-items-center gap-3">
+                    <h1 class="page-title mb-0" id="pageTitle">仪表盘</h1>
+                    <span class="badge bg-light text-muted" id="currentTime"></span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- 快捷搜索按钮 -->
+                    <button class="btn btn-light quick-search-btn" onclick="openQuickSearch()" title="快捷搜索 (Ctrl+K)">
+                        <i class="bi bi-search"></i>
+                        <span class="d-none d-md-inline ms-2">搜索</span>
+                        <kbd class="d-none d-lg-inline ms-2">Ctrl+K</kbd>
+                    </button>
+                    <!-- 主题切换按钮 -->
+                    <button class="btn btn-light theme-toggle-btn" onclick="toggleTheme()" title="切换主题">
+                        <i class="bi bi-sun-fill" id="themeIcon"></i>
+                    </button>
+                </div>
+                <div class="user-info dropdown">
+                    <div class="d-flex align-items-center gap-3 user-dropdown-trigger" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="text-end d-none d-md-block">
+                            <div class="fw-semibold" id="currentUser" style="color: #333; font-size: 14px;">管理员</div>
+                            <small class="text-muted" id="userRole" style="font-size: 12px;">管理员</small>
+                        </div>
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <i class="bi bi-chevron-down text-muted dropdown-arrow"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                        <li class="dropdown-header px-3 py-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="user-avatar-sm" id="dropdownAvatar">A</div>
+                                <div>
+                                    <div class="fw-bold" id="dropdownUserName">管理员</div>
+                                    <small class="text-muted" id="dropdownUserRole">管理员</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i>个人资料</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i>系统设置</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i>帮助中心</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger logout-item" href="#" onclick="event.preventDefault(); logout()"><i class="bi bi-box-arrow-right"></i>退出登录</a></li>
+                    </ul>
                 </div>
             </div>
             
@@ -620,7 +2512,13 @@
                             </button>
                         </div>
                         <div class="col-md-4 text-end">
-                            <button class="btn btn-success" onclick="showAddClassroomModal()">
+                            <button class="btn btn-outline-success me-2" onclick="exportClassrooms()">
+                                <i class="bi bi-download"></i> 导出
+                            </button>
+                            <button class="btn btn-outline-secondary me-2" onclick="printClassrooms()">
+                                <i class="bi bi-printer"></i> 打印
+                            </button>
+                            <button class="btn btn-success admin-only" onclick="showAddClassroomModal()">
                                 <i class="bi bi-plus-lg"></i> 新增教室
                             </button>
                         </div>
@@ -643,6 +2541,7 @@
                         <tbody id="classroomTable">
                         </tbody>
                     </table>
+                    <div id="classroomPagination" class="pagination-container"></div>
                 </div>
             </div>
             
@@ -663,6 +2562,9 @@
                             </button>
                         </div>
                         <div class="col-md-7 text-end">
+                            <button class="btn btn-outline-success me-2" onclick="exportCourses()">
+                                <i class="bi bi-download"></i> 导出
+                            </button>
                             <button class="btn btn-success" onclick="showAddCourseModal()">
                                 <i class="bi bi-plus-lg"></i> 新增课程
                             </button>
@@ -687,6 +2589,7 @@
                         <tbody id="courseTable">
                         </tbody>
                     </table>
+                    <div id="coursePagination" class="pagination-container"></div>
                 </div>
             </div>
             
@@ -739,6 +2642,7 @@
                         <tbody id="scheduleTable">
                         </tbody>
                     </table>
+                    <div id="schedulePagination" class="pagination-container"></div>
                 </div>
             </div>
             
@@ -758,9 +2662,12 @@
                             <select class="form-select" id="timetableTarget">
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-primary" onclick="loadTimetable()">
+                        <div class="col-md-4">
+                            <button class="btn btn-primary me-2" onclick="loadTimetable()">
                                 <i class="bi bi-search"></i> 查询
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="printTimetable()">
+                                <i class="bi bi-printer"></i> 打印课表
                             </button>
                         </div>
                     </div>
@@ -829,26 +2736,251 @@
                 </div>
             </div>
             
-            <!-- 统计分析页面 -->
-            <div class="page-content" id="page-statistics">
+            <!-- 设备管理页面 -->
+            <div class="page-content" id="page-equipment">
                 <div class="row g-4">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header">
-                                <i class="bi bi-bar-chart"></i> 教室利用率统计
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-display"></i> 设备列表</span>
+                                <button class="btn btn-primary btn-sm" onclick="showAddEquipmentModal()">
+                                    <i class="bi bi-plus-lg"></i> 新增设备
+                                </button>
                             </div>
                             <div class="card-body">
+                                <div class="filter-bar mb-3">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="filterEquipClassroom" onchange="loadEquipments()">
+                                                <option value="">全部教室</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="filterEquipType" onchange="loadEquipments()">
+                                                <option value="">全部类型</option>
+                                                <option value="blackboard">黑板</option>
+                                                <option value="desk">桌椅</option>
+                                                <option value="multimedia">多媒体</option>
+                                                <option value="ac">空调</option>
+                                                <option value="projector">投影仪</option>
+                                                <option value="computer">电脑</option>
+                                                <option value="other">其他</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="filterEquipStatus" onchange="loadEquipments()">
+                                                <option value="">全部状态</option>
+                                                <option value="normal">正常</option>
+                                                <option value="fault">故障</option>
+                                                <option value="maintenance">维修中</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="table-container" style="box-shadow: none;">
                                     <table class="table">
                                         <thead>
                                             <tr>
-                                                <th>教室编号</th>
-                                                <th>教室名称</th>
+                                                <th>设备编号</th>
+                                                <th>设备名称</th>
                                                 <th>类型</th>
-                                                <th>座位数</th>
+                                                <th>所属教室</th>
+                                                <th>品牌/型号</th>
+                                                <th>数量</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="equipmentTable">
+                                        </tbody>
+                                    </table>
+                                    <div id="equipmentPagination" class="pagination-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 班级管理页面 -->
+            <div class="page-content" id="page-classes">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-people"></i> 班级列表</span>
+                                <button class="btn btn-primary btn-sm" onclick="showAddClassModal()">
+                                    <i class="bi bi-plus-lg"></i> 新增班级
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="filter-bar mb-3">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" id="filterClassName" placeholder="搜索班级名称" onkeyup="loadClasses()">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="filterGrade" onchange="loadClasses()">
+                                                <option value="">全部年级</option>
+                                                <option value="2021">2021级</option>
+                                                <option value="2022">2022级</option>
+                                                <option value="2023">2023级</option>
+                                                <option value="2024">2024级</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" id="filterDepartment" placeholder="搜索院系" onkeyup="loadClasses()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-container" style="box-shadow: none;">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>班级编号</th>
+                                                <th>班级名称</th>
+                                                <th>年级</th>
+                                                <th>专业</th>
+                                                <th>院系</th>
+                                                <th>人数</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="classTable">
+                                        </tbody>
+                                    </table>
+                                    <div id="classPagination" class="pagination-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 教室预约页面 -->
+            <div class="page-content" id="page-bookings">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-calendar-check"></i> 教室预约管理</span>
+                        <button class="btn btn-primary btn-sm" onclick="showAddBookingModal()">
+                            <i class="bi bi-plus"></i> 新增预约
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterBookingStatus" onchange="loadBookings()">
+                                    <option value="">全部状态</option>
+                                    <option value="pending">待审批</option>
+                                    <option value="approved">已通过</option>
+                                    <option value="rejected">已拒绝</option>
+                                    <option value="cancelled">已取消</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>教室</th>
+                                        <th>申请人</th>
+                                        <th>日期</th>
+                                        <th>时间段</th>
+                                        <th>用途</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingTable"></tbody>
+                            </table>
+                            <div id="bookingPagination" class="pagination-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 学生选课页面 -->
+            <div class="page-content" id="page-enrollment">
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="bi bi-book"></i> 可选课程</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="searchCourse" placeholder="搜索课程名称..." oninput="filterAvailableCourses()">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="filterCourseType" onchange="filterAvailableCourses()">
+                                            <option value="">全部类型</option>
+                                            <option value="required">必修</option>
+                                            <option value="elective">选修</option>
+                                            <option value="public">公选</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="availableCoursesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <span><i class="bi bi-check-circle"></i> 已选课程</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="enrolledCoursesList"></div>
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="d-flex justify-content-between">
+                                        <span>已选学分：</span>
+                                        <strong id="totalCredits">0</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 通知公告页面 -->
+            <div class="page-content" id="page-notices">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-megaphone"></i> 通知公告</span>
+                        <button class="btn btn-primary btn-sm admin-only" onclick="showAddNoticeModal()">
+                            <i class="bi bi-plus"></i> 发布通知
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="noticeList"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 统计分析页面 -->
+            <div class="page-content" id="page-statistics">
+                <div class="row g-4">
+                    <!-- 教室利用率统计 -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bar-chart"></i> 教室利用率统计</span>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="printStatistics()">
+                                    <i class="bi bi-printer"></i> 打印
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container" style="box-shadow: none; max-height: 400px; overflow-y: auto;">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>教室编号</th>
+                                                <th>名称</th>
+                                                <th>类型</th>
                                                 <th>已用时段</th>
                                                 <th>利用率</th>
-                                                <th>利用率图示</th>
                                             </tr>
                                         </thead>
                                         <tbody id="utilizationTable">
@@ -856,6 +2988,99 @@
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计图表 -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="bi bi-pie-chart"></i> 教室使用状态
+                            </div>
+                            <div class="card-body">
+                                <canvas id="classroomStatusChart" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-graph-up"></i> 周课程分布
+                            </div>
+                            <div class="card-body">
+                                <canvas id="weeklyScheduleChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 热门课程排行 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-trophy"></i> 热门课程排行
+                            </div>
+                            <div class="card-body">
+                                <div id="popularCoursesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 教师工作量 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-person-workspace"></i> 教师授课统计
+                            </div>
+                            <div class="card-body">
+                                <div id="teacherWorkloadList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 用户管理页面 -->
+            <div class="page-content" id="page-users">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-person-gear"></i> 用户管理</span>
+                        <div>
+                            <button class="btn btn-outline-success btn-sm me-2" onclick="showImportUsersModal()">
+                                <i class="bi bi-upload"></i> 批量导入
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="showAddUserModal()">
+                                <i class="bi bi-plus"></i> 新增用户
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="searchUser" placeholder="搜索用户名/姓名..." oninput="loadUsers()">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="filterUserRole" onchange="loadUsers()">
+                                    <option value="">全部角色</option>
+                                    <option value="admin">管理员</option>
+                                    <option value="teacher">教师</option>
+                                    <option value="student">学生</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>姓名</th>
+                                        <th>角色</th>
+                                        <th>邮箱</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTable"></tbody>
+                            </table>
+                            <div id="userPagination" class="pagination-container"></div>
                         </div>
                     </div>
                 </div>
@@ -943,6 +3168,67 @@
         </div>
     </div>
     
+    <!-- 新增/编辑课程模态框 -->
+    <div class="modal fade" id="courseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="courseModalTitle">新增课程</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="courseForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">课程编号 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="courseCode" placeholder="如: CS101">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">课程名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="courseName" placeholder="如: 高等数学">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">授课教师</label>
+                                <select class="form-select" id="courseTeacher">
+                                    <option value="">请选择教师</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">学分</label>
+                                <input type="number" class="form-control" id="courseCredits" value="3" min="0" max="10">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">学时</label>
+                                <input type="number" class="form-control" id="courseHours" value="48" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">课程类型</label>
+                                <select class="form-select" id="courseType">
+                                    <option value="required">必修课</option>
+                                    <option value="elective">选修课</option>
+                                    <option value="public">公共课</option>
+                                    <option value="professional">专业课</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">课程容量</label>
+                                <input type="number" class="form-control" id="courseCapacity" value="30" min="1">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">课程简介</label>
+                                <textarea class="form-control" id="courseDescription" rows="3" placeholder="课程简介（选填）"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCourse()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 新增排课模态框 -->
     <div class="modal fade" id="scheduleModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -1020,6 +3306,397 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-primary" onclick="saveSchedule()">保存</button>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 设备模态框 -->
+    <div class="modal fade" id="equipmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="equipmentModalTitle">新增设备</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="equipmentForm">
+                        <input type="hidden" id="equipmentId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">设备编号 *</label>
+                                <input type="text" class="form-control" id="equipmentCode" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">设备名称 *</label>
+                                <input type="text" class="form-control" id="equipmentName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">设备类型 *</label>
+                                <select class="form-select" id="equipmentType" required>
+                                    <option value="">请选择</option>
+                                    <option value="blackboard">黑板</option>
+                                    <option value="desk">桌椅</option>
+                                    <option value="multimedia">多媒体</option>
+                                    <option value="ac">空调</option>
+                                    <option value="projector">投影仪</option>
+                                    <option value="computer">电脑</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">所属教室 *</label>
+                                <select class="form-select" id="equipmentClassroom" required>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">品牌</label>
+                                <input type="text" class="form-control" id="equipmentBrand">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">型号</label>
+                                <input type="text" class="form-control" id="equipmentModel">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">数量</label>
+                                <input type="number" class="form-control" id="equipmentQuantity" value="1" min="1">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">状态</label>
+                                <select class="form-select" id="equipmentStatus">
+                                    <option value="normal">正常</option>
+                                    <option value="fault">故障</option>
+                                    <option value="maintenance">维修中</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">购置日期</label>
+                                <input type="date" class="form-control" id="equipmentPurchaseDate">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">备注</label>
+                                <textarea class="form-control" id="equipmentRemark" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEquipment()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 班级模态框 -->
+    <div class="modal fade" id="classModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="classModalTitle">新增班级</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="classForm">
+                        <input type="hidden" id="classId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">班级编号 *</label>
+                                <input type="text" class="form-control" id="classCode" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">班级名称 *</label>
+                                <input type="text" class="form-control" id="className" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">年级 *</label>
+                                <select class="form-select" id="classGrade" required>
+                                    <option value="">请选择</option>
+                                    <option value="2021">2021级</option>
+                                    <option value="2022">2022级</option>
+                                    <option value="2023">2023级</option>
+                                    <option value="2024">2024级</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">专业 *</label>
+                                <input type="text" class="form-control" id="classMajor" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">院系</label>
+                                <input type="text" class="form-control" id="classDepartment">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">人数</label>
+                                <input type="number" class="form-control" id="classStudentCount" value="30" min="1">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">备注</label>
+                                <textarea class="form-control" id="classRemark" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClass()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 用户模态框 -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">新增用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">用户名 *</label>
+                                <input type="text" class="form-control" id="userUsername" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">姓名 *</label>
+                                <input type="text" class="form-control" id="userRealName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">角色 *</label>
+                                <select class="form-select" id="userRole" required>
+                                    <option value="student">学生</option>
+                                    <option value="teacher">教师</option>
+                                    <option value="admin">管理员</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">邮箱</label>
+                                <input type="email" class="form-control" id="userEmail">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">手机</label>
+                                <input type="tel" class="form-control" id="userPhone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">初始密码</label>
+                                <input type="password" class="form-control" id="userPassword" placeholder="留空则使用123456">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 批量导入用户模态框 -->
+    <div class="modal fade" id="importUsersModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">批量导入用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">请粘贴CSV格式的用户数据，每行一个用户：</p>
+                    <p class="small text-info">格式: 用户名,姓名,角色(admin/teacher/student),邮箱</p>
+                    <textarea class="form-control" id="importUsersData" rows="10" placeholder="admin2,管理员2,admin,admin2@example.com
+teacher2,教师2,teacher,teacher2@example.com
+student2,学生2,student,student2@example.com"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="importUsers()">导入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 预约模态框 -->
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">教室预约</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">选择教室 *</label>
+                                <select class="form-select" id="bookingClassroom" required></select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">预约日期 *</label>
+                                <input type="date" class="form-control" id="bookingDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">开始节次 *</label>
+                                <select class="form-select" id="bookingStartSection" required>
+                                    <option value="1">第1节</option>
+                                    <option value="2">第2节</option>
+                                    <option value="3">第3节</option>
+                                    <option value="4">第4节</option>
+                                    <option value="5">第5节</option>
+                                    <option value="6">第6节</option>
+                                    <option value="7">第7节</option>
+                                    <option value="8">第8节</option>
+                                    <option value="9">第9节</option>
+                                    <option value="10">第10节</option>
+                                    <option value="11">第11节</option>
+                                    <option value="12">第12节</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">结束节次 *</label>
+                                <select class="form-select" id="bookingEndSection" required>
+                                    <option value="1">第1节</option>
+                                    <option value="2" selected>第2节</option>
+                                    <option value="3">第3节</option>
+                                    <option value="4">第4节</option>
+                                    <option value="5">第5节</option>
+                                    <option value="6">第6节</option>
+                                    <option value="7">第7节</option>
+                                    <option value="8">第8节</option>
+                                    <option value="9">第9节</option>
+                                    <option value="10">第10节</option>
+                                    <option value="11">第11节</option>
+                                    <option value="12">第12节</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">用途说明</label>
+                                <textarea class="form-control" id="bookingPurpose" rows="2" placeholder="请说明预约用途..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBooking()">提交预约</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知模态框 -->
+    <div class="modal fade" id="noticeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noticeModalTitle">发布通知</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="noticeForm">
+                        <input type="hidden" id="noticeId">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">标题 *</label>
+                                <input type="text" class="form-control" id="noticeTitle" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">类型</label>
+                                <select class="form-select" id="noticeType">
+                                    <option value="system">系统通知</option>
+                                    <option value="academic">教务通知</option>
+                                    <option value="activity">活动通知</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">内容 *</label>
+                                <textarea class="form-control" id="noticeContent" rows="8" required></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="noticeIsTop">
+                                    <label class="form-check-label" for="noticeIsTop">置顶</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNotice()">发布</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知详情模态框 -->
+    <div class="modal fade" id="noticeDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noticeDetailTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-muted mb-3">
+                        <small>
+                            <i class="bi bi-person"></i> <span id="noticeDetailAuthor"></span> · 
+                            <i class="bi bi-clock"></i> <span id="noticeDetailTime"></span> · 
+                            <i class="bi bi-eye"></i> <span id="noticeDetailViews"></span> 次浏览
+                        </small>
+                    </div>
+                    <div id="noticeDetailContent" style="white-space: pre-wrap;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷搜索模态框 -->
+    <div class="quick-search-overlay" id="quickSearchOverlay" onclick="closeQuickSearch()">
+        <div class="quick-search-modal" onclick="event.stopPropagation()">
+            <div class="quick-search-header">
+                <i class="bi bi-search"></i>
+                <input type="text" class="quick-search-input" id="quickSearchInput" 
+                       placeholder="输入搜索内容，如：教室、课程、教师..." 
+                       oninput="performQuickSearch(this.value)" 
+                       onkeydown="handleSearchKeydown(event)">
+                <kbd>ESC</kbd>
+            </div>
+            <div class="quick-search-results" id="quickSearchResults">
+                <div class="search-section">
+                    <div class="search-section-title">快捷导航</div>
+                    <div class="search-item" onclick="quickNavigate('dashboard')">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>仪表盘</span>
+                    </div>
+                    <div class="search-item" onclick="quickNavigate('classrooms')">
+                        <i class="bi bi-building"></i>
+                        <span>教室管理</span>
+                    </div>
+                    <div class="search-item" onclick="quickNavigate('courses')">
+                        <i class="bi bi-book"></i>
+                        <span>课程管理</span>
+                    </div>
+                    <div class="search-item" onclick="quickNavigate('schedules')">
+                        <i class="bi bi-calendar3"></i>
+                        <span>排课管理</span>
+                    </div>
+                    <div class="search-item" onclick="quickNavigate('equipments')">
+                        <i class="bi bi-tv"></i>
+                        <span>设备管理</span>
+                    </div>
+                    <div class="search-item" onclick="quickNavigate('bookings')">
+                        <i class="bi bi-bookmark"></i>
+                        <span>预约管理</span>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-search-footer">
+                <span><kbd>↑↓</kbd> 选择</span>
+                <span><kbd>Enter</kbd> 确认</span>
+                <span><kbd>ESC</kbd> 关闭</span>
             </div>
         </div>
     </div>

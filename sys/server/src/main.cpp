@@ -2,6 +2,7 @@
 #include "db.hpp"
 #include "json.hpp"
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <signal.h>
 
@@ -165,27 +166,73 @@ void handleDeleteClassroom(const HttpRequest& req, HttpResponse& res) {
 }
 
 // ========== 设备管理 ==========
-void handleGetEquipments(const HttpRequest& req, HttpResponse& res) {
+void handleGetEquipmentsByClassroom(const HttpRequest& req, HttpResponse& res) {
     std::string classroomId = req.params.at("classroomId");
     auto& db = Database::getInstance();
     
-    auto result = db.query("SELECT * FROM equipment WHERE classroom_id = " + classroomId);
+    auto result = db.query("SELECT e.*, c.name AS classroom_name, c.classroom_code "
+                          "FROM equipment e "
+                          "LEFT JOIN classroom c ON e.classroom_id = c.id "
+                          "WHERE e.classroom_id = " + classroomId);
     res.setJson(Json::fromDbResult(result));
 }
 
+void handleGetEquipments(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto queryParams = req.parseQuery();
+    
+    std::string sql = "SELECT e.*, c.name AS classroom_name, c.classroom_code "
+                     "FROM equipment e "
+                     "LEFT JOIN classroom c ON e.classroom_id = c.id WHERE 1=1";
+    
+    if (queryParams.count("classroom_id") && !queryParams.at("classroom_id").empty()) {
+        sql += " AND e.classroom_id = " + queryParams.at("classroom_id");
+    }
+    if (queryParams.count("equipment_type") && !queryParams.at("equipment_type").empty()) {
+        sql += " AND e.equipment_type = '" + db.escape(queryParams.at("equipment_type")) + "'";
+    }
+    if (queryParams.count("status") && !queryParams.at("status").empty()) {
+        sql += " AND e.status = '" + db.escape(queryParams.at("status")) + "'";
+    }
+    
+    sql += " ORDER BY e.id DESC";
+    auto result = db.query(sql);
+    res.setJson(Json::fromDbResult(result));
+}
+
+void handleGetEquipment(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    auto result = db.query("SELECT e.*, c.name AS classroom_name "
+                          "FROM equipment e "
+                          "LEFT JOIN classroom c ON e.classroom_id = c.id "
+                          "WHERE e.id = " + id);
+    if (result.empty()) {
+        res.setStatus(404);
+        res.setJson("{\"error\": \"设备不存在\"}");
+        return;
+    }
+    res.setJson(Json::fromDbRow(result[0]));
+}
+
 void handleCreateEquipment(const HttpRequest& req, HttpResponse& res) {
-    std::string classroomId = req.params.at("classroomId");
     auto params = Json::parse(req.body);
     auto& db = Database::getInstance();
     
-    std::string sql = "INSERT INTO equipment (classroom_id, equipment_type, equipment_name, brand, model, quantity, status, remark) VALUES ("
+    std::string classroomId = params["classroom_id"].empty() ? "NULL" : params["classroom_id"];
+    std::string purchaseDate = params["purchase_date"].empty() ? "NULL" : "'" + db.escape(params["purchase_date"]) + "'";
+    
+    std::string sql = "INSERT INTO equipment (equipment_code, name, equipment_type, classroom_id, brand, model, quantity, status, purchase_date, remark) VALUES ('"
+        + db.escape(params["equipment_code"]) + "', '"
+        + db.escape(params["name"]) + "', '"
+        + db.escape(params["equipment_type"]) + "', "
         + classroomId + ", '"
-        + db.escape(params["equipment_type"]) + "', '"
-        + db.escape(params["equipment_name"]) + "', '"
         + db.escape(params["brand"]) + "', '"
         + db.escape(params["model"]) + "', "
         + (params["quantity"].empty() ? "1" : params["quantity"]) + ", '"
-        + (params["status"].empty() ? "normal" : db.escape(params["status"])) + "', '"
+        + (params["status"].empty() ? "normal" : db.escape(params["status"])) + "', "
+        + purchaseDate + ", '"
         + db.escape(params["remark"]) + "')";
     
     if (db.execute(sql)) {
@@ -194,6 +241,35 @@ void handleCreateEquipment(const HttpRequest& req, HttpResponse& res) {
     } else {
         res.setStatus(400);
         res.setJson("{\"error\": \"创建失败\"}");
+    }
+}
+
+void handleUpdateEquipment(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto params = Json::parse(req.body);
+    auto& db = Database::getInstance();
+    
+    std::string classroomId = params["classroom_id"].empty() ? "NULL" : params["classroom_id"];
+    std::string purchaseDate = params["purchase_date"].empty() ? "NULL" : "'" + db.escape(params["purchase_date"]) + "'";
+    
+    std::string sql = "UPDATE equipment SET "
+        "name = '" + db.escape(params["name"]) + "', "
+        "equipment_type = '" + db.escape(params["equipment_type"]) + "', "
+        "classroom_id = " + classroomId + ", "
+        "brand = '" + db.escape(params["brand"]) + "', "
+        "model = '" + db.escape(params["model"]) + "', "
+        "quantity = " + (params["quantity"].empty() ? "1" : params["quantity"]) + ", "
+        "status = '" + db.escape(params["status"]) + "', "
+        "purchase_date = " + purchaseDate + ", "
+        "remark = '" + db.escape(params["remark"]) + "' "
+        "WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setStatus(200);
+        res.setJson("{\"success\": true}");
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"更新失败\"}");
     }
 }
 
@@ -232,6 +308,20 @@ void handleGetCourses(const HttpRequest& req, HttpResponse& res) {
     
     auto result = db.query(sql);
     res.setJson(Json::fromDbResult(result));
+}
+
+void handleGetCourse(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    auto result = db.query("SELECT c.*, t.name AS teacher_name FROM course c "
+                          "LEFT JOIN teacher t ON c.teacher_id = t.id WHERE c.id = " + id);
+    if (result.empty()) {
+        res.setStatus(404);
+        res.setJson("{\"error\": \"课程不存在\"}");
+        return;
+    }
+    res.setJson(Json::fromDbRow(result[0]));
 }
 
 void handleCreateCourse(const HttpRequest& req, HttpResponse& res) {
@@ -494,8 +584,93 @@ void handleGetStudentTimetable(const HttpRequest& req, HttpResponse& res) {
 // ========== 班级管理 ==========
 void handleGetClasses(const HttpRequest& req, HttpResponse& res) {
     auto& db = Database::getInstance();
-    auto result = db.query("SELECT * FROM class_info ORDER BY class_code");
+    auto queryParams = req.parseQuery();
+    
+    std::string sql = "SELECT * FROM class_info WHERE 1=1";
+    
+    if (queryParams.count("name") && !queryParams.at("name").empty()) {
+        sql += " AND class_name LIKE '%" + db.escape(queryParams.at("name")) + "%'";
+    }
+    if (queryParams.count("grade") && !queryParams.at("grade").empty()) {
+        sql += " AND grade = '" + db.escape(queryParams.at("grade")) + "'";
+    }
+    if (queryParams.count("department") && !queryParams.at("department").empty()) {
+        sql += " AND department LIKE '%" + db.escape(queryParams.at("department")) + "%'";
+    }
+    
+    sql += " ORDER BY class_code";
+    auto result = db.query(sql);
     res.setJson(Json::fromDbResult(result));
+}
+
+void handleGetClass(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    auto result = db.query("SELECT * FROM class_info WHERE id = " + id);
+    if (result.empty()) {
+        res.setStatus(404);
+        res.setJson("{\"error\": \"班级不存在\"}");
+        return;
+    }
+    res.setJson(Json::fromDbRow(result[0]));
+}
+
+void handleCreateClass(const HttpRequest& req, HttpResponse& res) {
+    auto params = Json::parse(req.body);
+    auto& db = Database::getInstance();
+    
+    std::string sql = "INSERT INTO class_info (class_code, class_name, grade, major, department, student_count, remark) VALUES ('"
+        + db.escape(params["class_code"]) + "', '"
+        + db.escape(params["class_name"]) + "', '"
+        + db.escape(params["grade"]) + "', '"
+        + db.escape(params["major"]) + "', '"
+        + db.escape(params["department"]) + "', "
+        + (params["student_count"].empty() ? "30" : params["student_count"]) + ", '"
+        + db.escape(params["remark"]) + "')";
+    
+    if (db.execute(sql)) {
+        res.setStatus(201);
+        res.setJson("{\"id\": " + std::to_string(db.lastInsertId()) + "}");
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"创建失败\"}");
+    }
+}
+
+void handleUpdateClass(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto params = Json::parse(req.body);
+    auto& db = Database::getInstance();
+    
+    std::string sql = "UPDATE class_info SET "
+        "class_name = '" + db.escape(params["class_name"]) + "', "
+        "grade = '" + db.escape(params["grade"]) + "', "
+        "major = '" + db.escape(params["major"]) + "', "
+        "department = '" + db.escape(params["department"]) + "', "
+        "student_count = " + (params["student_count"].empty() ? "30" : params["student_count"]) + ", "
+        "remark = '" + db.escape(params["remark"]) + "' "
+        "WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setStatus(200);
+        res.setJson("{\"success\": true}");
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"更新失败\"}");
+    }
+}
+
+void handleDeleteClass(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    if (db.execute("DELETE FROM class_info WHERE id = " + id)) {
+        res.setStatus(204);
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"删除失败\"}");
+    }
 }
 
 // ========== 统计分析 ==========
@@ -595,6 +770,402 @@ void handleGetSectionTimes(const HttpRequest& req, HttpResponse& res) {
     res.setJson(Json::fromDbResult(result));
 }
 
+// ========== 通知公告 ==========
+void handleGetNotices(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    std::string sql = R"(
+        SELECT n.*, u.real_name as author_name 
+        FROM notice n 
+        LEFT JOIN user u ON n.author_id = u.id 
+        WHERE n.status = 'published'
+        ORDER BY n.is_top DESC, n.publish_time DESC
+        LIMIT 50
+    )";
+    auto result = db.query(sql);
+    res.setJson(Json::fromDbResult(result));
+}
+
+void handleGetNotice(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    // 增加浏览次数
+    db.execute("UPDATE notice SET view_count = view_count + 1 WHERE id = " + id);
+    
+    auto result = db.query(
+        "SELECT n.*, u.real_name as author_name FROM notice n "
+        "LEFT JOIN user u ON n.author_id = u.id WHERE n.id = " + id
+    );
+    
+    if (result.empty()) {
+        res.setStatus(404);
+        res.setJson("{\"error\": \"通知不存在\"}");
+        return;
+    }
+    res.setJson(Json::fromDbRow(result[0]));
+}
+
+void handleCreateNotice(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    std::string sql = "INSERT INTO notice (title, content, author_id, notice_type, is_top) VALUES ('" +
+        db.escape(data["title"]) + "', '" +
+        db.escape(data["content"]) + "', " +
+        data["author_id"] + ", '" +
+        db.escape(data["notice_type"]) + "', " +
+        (data["is_top"] == "true" ? "1" : "0") + ")";
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"id\": " + std::to_string(db.lastInsertId()) + ", \"message\": \"发布成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"发布失败\"}");
+    }
+}
+
+void handleUpdateNotice(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    std::string sql = "UPDATE notice SET title = '" + db.escape(data["title"]) + 
+        "', content = '" + db.escape(data["content"]) +
+        "', notice_type = '" + db.escape(data["notice_type"]) +
+        "', is_top = " + (data["is_top"] == "true" ? "1" : "0") +
+        " WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"message\": \"更新成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"更新失败\"}");
+    }
+}
+
+void handleDeleteNotice(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    if (db.execute("DELETE FROM notice WHERE id = " + id)) {
+        res.setStatus(204);
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"删除失败\"}");
+    }
+}
+
+// ========== 教室预约 ==========
+void handleGetBookings(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto queryParams = req.parseQuery();
+    std::string status = queryParams.count("status") ? queryParams["status"] : "";
+    std::string classroomId = queryParams.count("classroom_id") ? queryParams["classroom_id"] : "";
+    
+    std::string sql = R"(
+        SELECT b.*, c.classroom_code, c.name as classroom_name, 
+               u.real_name as applicant_name, a.real_name as approver_name
+        FROM booking b
+        LEFT JOIN classroom c ON b.classroom_id = c.id
+        LEFT JOIN user u ON b.applicant_id = u.id
+        LEFT JOIN user a ON b.approver_id = a.id
+        WHERE 1=1
+    )";
+    
+    if (!status.empty()) sql += " AND b.status = '" + db.escape(status) + "'";
+    if (!classroomId.empty()) sql += " AND b.classroom_id = " + classroomId;
+    
+    sql += " ORDER BY b.booking_date DESC, b.start_section";
+    
+    auto result = db.query(sql);
+    res.setJson(Json::fromDbResult(result));
+}
+
+void handleCreateBooking(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    // 检查时间冲突
+    std::string checkSql = "SELECT id FROM booking WHERE classroom_id = " + data["classroom_id"] +
+        " AND booking_date = '" + data["booking_date"] + "'" +
+        " AND status IN ('pending', 'approved')" +
+        " AND ((start_section <= " + data["end_section"] + " AND end_section >= " + data["start_section"] + "))";
+    
+    auto existing = db.query(checkSql);
+    if (!existing.empty()) {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"该时间段已有预约\"}");
+        return;
+    }
+    
+    std::string sql = "INSERT INTO booking (classroom_id, applicant_id, booking_date, start_section, end_section, purpose) VALUES (" +
+        data["classroom_id"] + ", " +
+        data["applicant_id"] + ", '" +
+        data["booking_date"] + "', " +
+        data["start_section"] + ", " +
+        data["end_section"] + ", '" +
+        db.escape(data["purpose"]) + "')";
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"id\": " + std::to_string(db.lastInsertId()) + ", \"message\": \"预约提交成功，等待审批\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"预约失败\"}");
+    }
+}
+
+void handleApproveBooking(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    std::string status = data["approved"] == "true" ? "approved" : "rejected";
+    std::string sql = "UPDATE booking SET status = '" + status + 
+        "', approver_id = " + data["approver_id"] +
+        ", approved_at = NOW() WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"message\": \"" + std::string(status == "approved" ? "审批通过" : "已拒绝") + "\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"操作失败\"}");
+    }
+}
+
+// ========== 选课相关 ==========
+void handleGetEnrollments(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto queryParams = req.parseQuery();
+    std::string studentId = queryParams.count("student_id") ? queryParams["student_id"] : "";
+    std::string courseId = queryParams.count("course_id") ? queryParams["course_id"] : "";
+    
+    std::string sql = R"(
+        SELECT e.*, s.student_code, s.name as student_name,
+               c.course_code, c.name as course_name, t.name as teacher_name
+        FROM enrollment e
+        LEFT JOIN student s ON e.student_id = s.id
+        LEFT JOIN course c ON e.course_id = c.id
+        LEFT JOIN teacher t ON c.teacher_id = t.id
+        WHERE 1=1
+    )";
+    
+    if (!studentId.empty()) sql += " AND e.student_id = " + studentId;
+    if (!courseId.empty()) sql += " AND e.course_id = " + courseId;
+    
+    sql += " ORDER BY e.created_at DESC";
+    
+    auto result = db.query(sql);
+    res.setJson(Json::fromDbResult(result));
+}
+
+void handleEnrollCourse(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    // 检查是否已选
+    auto existing = db.query("SELECT id FROM enrollment WHERE student_id = " + data["student_id"] + 
+        " AND course_id = " + data["course_id"] + " AND semester = '" + data["semester"] + "'");
+    
+    if (!existing.empty()) {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"已选该课程\"}");
+        return;
+    }
+    
+    // 检查课程容量
+    auto course = db.query("SELECT capacity FROM course WHERE id = " + data["course_id"]);
+    auto enrolled = db.query("SELECT COUNT(*) as cnt FROM enrollment WHERE course_id = " + data["course_id"] + 
+        " AND semester = '" + data["semester"] + "' AND status = 'enrolled'");
+    
+    if (!course.empty() && !enrolled.empty()) {
+        int capacity = std::stoi(course[0]["capacity"]);
+        int current = std::stoi(enrolled[0]["cnt"]);
+        if (current >= capacity) {
+            res.setStatus(400);
+            res.setJson("{\"error\": \"课程已满\"}");
+            return;
+        }
+    }
+    
+    std::string sql = "INSERT INTO enrollment (student_id, course_id, semester) VALUES (" +
+        data["student_id"] + ", " + data["course_id"] + ", '" + data["semester"] + "')";
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"message\": \"选课成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"选课失败\"}");
+    }
+}
+
+void handleDropCourse(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    if (db.execute("UPDATE enrollment SET status = 'dropped' WHERE id = " + id)) {
+        res.setJson("{\"message\": \"退课成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"退课失败\"}");
+    }
+}
+
+// ========== 用户管理 ==========
+void handleGetUsers(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto queryParams = req.parseQuery();
+    std::string search = queryParams.count("search") ? queryParams["search"] : "";
+    std::string role = queryParams.count("role") ? queryParams["role"] : "";
+    
+    std::string sql = "SELECT id, username, real_name, role, email, phone, created_at FROM user WHERE 1=1";
+    
+    if (!search.empty()) {
+        sql += " AND (username LIKE '%" + db.escape(search) + "%' OR real_name LIKE '%" + db.escape(search) + "%')";
+    }
+    if (!role.empty()) {
+        sql += " AND role = '" + db.escape(role) + "'";
+    }
+    
+    sql += " ORDER BY created_at DESC";
+    
+    auto result = db.query(sql);
+    res.setJson(Json::fromDbResult(result));
+}
+
+void handleCreateUser(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    // 检查用户名是否已存在
+    auto existing = db.query("SELECT id FROM user WHERE username = '" + db.escape(data["username"]) + "'");
+    if (!existing.empty()) {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"用户名已存在\"}");
+        return;
+    }
+    
+    std::string password = data["password"].empty() ? "123456" : data["password"];
+    
+    std::string sql = "INSERT INTO user (username, password, real_name, role, email, phone) VALUES ('" +
+        db.escape(data["username"]) + "', SHA2('" + db.escape(password) + "', 256), '" +
+        db.escape(data["real_name"]) + "', '" +
+        db.escape(data["role"]) + "', '" +
+        db.escape(data["email"]) + "', '" +
+        db.escape(data["phone"]) + "')";
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"id\": " + std::to_string(db.lastInsertId()) + ", \"message\": \"创建成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"创建失败\"}");
+    }
+}
+
+void handleUpdateUser(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    std::string sql = "UPDATE user SET real_name = '" + db.escape(data["real_name"]) + 
+        "', role = '" + db.escape(data["role"]) +
+        "', email = '" + db.escape(data["email"]) +
+        "', phone = '" + db.escape(data["phone"]) + "'";
+    
+    if (!data["password"].empty()) {
+        sql += ", password = SHA2('" + db.escape(data["password"]) + "', 256)";
+    }
+    
+    sql += " WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"message\": \"更新成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"更新失败\"}");
+    }
+}
+
+void handleDeleteUser(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    // 不允许删除admin用户
+    auto user = db.query("SELECT username FROM user WHERE id = " + id);
+    if (!user.empty() && user[0]["username"] == "admin") {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"不能删除管理员账户\"}");
+        return;
+    }
+    
+    if (db.execute("DELETE FROM user WHERE id = " + id)) {
+        res.setJson("{\"message\": \"删除成功\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"删除失败\"}");
+    }
+}
+
+void handleResetPassword(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    if (db.execute("UPDATE user SET password = SHA2('123456', 256) WHERE id = " + id)) {
+        res.setJson("{\"message\": \"密码已重置为123456\"}");
+    } else {
+        res.setStatus(500);
+        res.setJson("{\"error\": \"重置失败\"}");
+    }
+}
+
+void handleBatchCreateUsers(const HttpRequest& req, HttpResponse& res) {
+    auto& db = Database::getInstance();
+    auto data = Json::parse(req.body);
+    
+    int success = 0, failed = 0;
+    
+    // 解析用户数据 - 简单的逗号分隔格式: username,real_name,role,email
+    std::string usersData = data["users"];
+    std::istringstream stream(usersData);
+    std::string line;
+    
+    while (std::getline(stream, line)) {
+        if (line.empty()) continue;
+        
+        std::vector<std::string> parts;
+        std::istringstream lineStream(line);
+        std::string part;
+        while (std::getline(lineStream, part, ',')) {
+            parts.push_back(part);
+        }
+        
+        if (parts.size() >= 3) {
+            std::string username = parts[0];
+            std::string realName = parts[1];
+            std::string role = parts[2];
+            std::string email = parts.size() > 3 ? parts[3] : "";
+            
+            // 检查用户名是否已存在
+            auto existing = db.query("SELECT id FROM user WHERE username = '" + db.escape(username) + "'");
+            if (!existing.empty()) {
+                failed++;
+                continue;
+            }
+            
+            std::string sql = "INSERT INTO user (username, password, real_name, role, email) VALUES ('" +
+                db.escape(username) + "', SHA2('123456', 256), '" +
+                db.escape(realName) + "', '" + db.escape(role) + "', '" + db.escape(email) + "')";
+            
+            if (db.execute(sql)) {
+                success++;
+            } else {
+                failed++;
+            }
+        }
+    }
+    
+    res.setJson("{\"success\": " + std::to_string(success) + ", \"failed\": " + std::to_string(failed) + "}");
+}
+
 // ========== 主函数 ==========
 int main() {
     // 信号处理
@@ -612,8 +1183,8 @@ int main() {
     HttpServer server(8080);
     g_server = &server;
     
-    // 设置静态文件目录 (使用绝对路径或正确的相对路径)
-    server.setStaticDir("../../frontend");
+    // 设置静态文件目录 (使用绝对路径)
+    server.setStaticDir("/Users/fengrr/Desktop/程序设计方法实现/code/sys/frontend");
     
     // ===== 注册路由 =====
     
@@ -628,12 +1199,16 @@ int main() {
     server.del("/api/classrooms/:id", handleDeleteClassroom);
     
     // 设备管理
-    server.get("/api/classrooms/:classroomId/equipments", handleGetEquipments);
-    server.post("/api/classrooms/:classroomId/equipments", handleCreateEquipment);
+    server.get("/api/equipments", handleGetEquipments);
+    server.get("/api/equipments/:id", handleGetEquipment);
+    server.post("/api/equipments", handleCreateEquipment);
+    server.put("/api/equipments/:id", handleUpdateEquipment);
     server.del("/api/equipments/:id", handleDeleteEquipment);
+    server.get("/api/classrooms/:classroomId/equipments", handleGetEquipmentsByClassroom);
     
     // 课程管理
     server.get("/api/courses", handleGetCourses);
+    server.get("/api/courses/:id", handleGetCourse);
     server.post("/api/courses", handleCreateCourse);
     
     // 排课管理
@@ -652,8 +1227,12 @@ int main() {
     server.get("/api/teachers/:id/timetable", handleGetTeacherTimetable);
     server.get("/api/students/:id/timetable", handleGetStudentTimetable);
     
-    // 班级
+    // 班级管理
     server.get("/api/classes", handleGetClasses);
+    server.get("/api/classes/:id", handleGetClass);
+    server.post("/api/classes", handleCreateClass);
+    server.put("/api/classes/:id", handleUpdateClass);
+    server.del("/api/classes/:id", handleDeleteClass);
     
     // 统计
     server.get("/api/statistics/utilization", handleGetUtilization);
@@ -663,6 +1242,31 @@ int main() {
     
     // 节次时间
     server.get("/api/section-times", handleGetSectionTimes);
+    
+    // 通知公告
+    server.get("/api/notices", handleGetNotices);
+    server.get("/api/notices/:id", handleGetNotice);
+    server.post("/api/notices", handleCreateNotice);
+    server.put("/api/notices/:id", handleUpdateNotice);
+    server.del("/api/notices/:id", handleDeleteNotice);
+    
+    // 教室预约
+    server.get("/api/bookings", handleGetBookings);
+    server.post("/api/bookings", handleCreateBooking);
+    server.put("/api/bookings/:id/approve", handleApproveBooking);
+    
+    // 选课
+    server.get("/api/enrollments", handleGetEnrollments);
+    server.post("/api/enrollments", handleEnrollCourse);
+    server.put("/api/enrollments/:id/drop", handleDropCourse);
+    
+    // 用户管理
+    server.get("/api/users", handleGetUsers);
+    server.post("/api/users", handleCreateUser);
+    server.put("/api/users/:id", handleUpdateUser);
+    server.del("/api/users/:id", handleDeleteUser);
+    server.put("/api/users/:id/reset-password", handleResetPassword);
+    server.post("/api/users/batch", handleBatchCreateUsers);
     
     std::cout << "===== 教室资源管理系统后端 =====" << std::endl;
     std::cout << "API文档: http://localhost:8080/api" << std::endl;

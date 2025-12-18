@@ -57,17 +57,36 @@ bool Database::isConnected() const {
     return connected_ && mysql_ping(conn_) == 0;
 }
 
+// 检查并重连
+bool Database::ensureConnected() {
+    if (!connected_ || !conn_) return false;
+    
+    if (mysql_ping(conn_) != 0) {
+        std::cerr << "MySQL连接已断开，尝试重连..." << std::endl;
+        // mysql_ping会自动重连（如果设置了MYSQL_OPT_RECONNECT）
+        if (mysql_ping(conn_) != 0) {
+            std::cerr << "MySQL重连失败: " << mysql_error(conn_) << std::endl;
+            return false;
+        }
+        std::cout << "MySQL重连成功" << std::endl;
+    }
+    return true;
+}
+
 DbResult Database::query(const std::string& sql) {
     DbResult result;
     
-    if (!connected_) {
+    if (!ensureConnected()) {
         std::cerr << "数据库未连接" << std::endl;
         return result;
     }
     
     if (mysql_query(conn_, sql.c_str()) != 0) {
         std::cerr << "SQL查询失败: " << mysql_error(conn_) << "\nSQL: " << sql << std::endl;
-        return result;
+        // 尝试重连后重试一次
+        if (ensureConnected() && mysql_query(conn_, sql.c_str()) != 0) {
+            return result;
+        }
     }
     
     MYSQL_RES* res = mysql_store_result(conn_);
@@ -95,7 +114,7 @@ DbResult Database::query(const std::string& sql) {
 }
 
 bool Database::execute(const std::string& sql) {
-    if (!connected_) {
+    if (!ensureConnected()) {
         std::cerr << "数据库未连接" << std::endl;
         return false;
     }

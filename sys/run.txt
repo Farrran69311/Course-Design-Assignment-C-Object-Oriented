@@ -1,0 +1,1 @@
+cd /Users/fengrr/Desktop/程序设计方法实现/code/sys/server/build && ./classroom_server

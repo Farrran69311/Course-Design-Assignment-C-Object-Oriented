@@ -69,17 +69,18 @@ CREATE TABLE IF NOT EXISTS classroom (
 -- ========== 教室设备 ==========
 CREATE TABLE IF NOT EXISTS equipment (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    classroom_id INT NOT NULL,
-    equipment_type ENUM('blackboard', 'whiteboard', 'projector', 'computer', 'air_conditioner', 'speaker', 'microphone', 'camera', 'desk', 'chair', 'other') NOT NULL COMMENT '设备类型',
-    equipment_name VARCHAR(100) NOT NULL COMMENT '设备名称',
+    equipment_code VARCHAR(50) UNIQUE NOT NULL COMMENT '设备编号',
+    name VARCHAR(100) NOT NULL COMMENT '设备名称',
+    classroom_id INT COMMENT '所属教室',
+    equipment_type ENUM('blackboard', 'whiteboard', 'projector', 'computer', 'air_conditioner', 'speaker', 'microphone', 'camera', 'desk', 'chair', 'multimedia', 'ac', 'other') NOT NULL COMMENT '设备类型',
     brand VARCHAR(100) COMMENT '品牌',
     model VARCHAR(100) COMMENT '型号',
     quantity INT DEFAULT 1 COMMENT '数量',
-    status ENUM('normal', 'broken', 'maintenance') DEFAULT 'normal' COMMENT '状态',
+    status ENUM('normal', 'fault', 'maintenance') DEFAULT 'normal' COMMENT '状态',
     purchase_date DATE COMMENT '购置日期',
     remark TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (classroom_id) REFERENCES classroom(id) ON DELETE CASCADE
+    FOREIGN KEY (classroom_id) REFERENCES classroom(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ========== 课程信息 ==========
@@ -207,7 +208,15 @@ INSERT INTO section_time (section_no, start_time, end_time, period_name) VALUES
 
 -- ========== 初始化管理员账户 ==========
 INSERT INTO `user` (username, password_hash, role, real_name) VALUES
-('admin', SHA2('admin123', 256), 'admin', '系统管理员');
+('admin', SHA2('123456', 256), 'admin', '系统管理员'),
+('teacher1', SHA2('123456', 256), 'teacher', '张三老师'),
+('teacher2', SHA2('123456', 256), 'teacher', '李四老师'),
+('student1', SHA2('123456', 256), 'student', '王同学'),
+('student2', SHA2('123456', 256), 'student', '李同学');
+
+-- 关联教师用户
+UPDATE teacher SET user_id = (SELECT id FROM `user` WHERE username = 'teacher1') WHERE teacher_code = 'T001';
+UPDATE teacher SET user_id = (SELECT id FROM `user` WHERE username = 'teacher2') WHERE teacher_code = 'T002';
 
 -- ========== 插入测试数据 ==========
 -- 教师
@@ -226,17 +235,18 @@ INSERT INTO classroom (classroom_code, name, building, floor, location, category
 ('C301', 'C楼301', 'C楼', 3, 'C楼三层', 'meeting', 20, '西', 'available');
 
 -- 设备
-INSERT INTO equipment (classroom_id, equipment_type, equipment_name, quantity, status) VALUES
-(1, 'projector', '投影仪', 1, 'normal'),
-(1, 'computer', '教师电脑', 1, 'normal'),
-(1, 'air_conditioner', '空调', 4, 'normal'),
-(1, 'speaker', '音响', 2, 'normal'),
-(2, 'projector', '投影仪', 1, 'normal'),
-(2, 'whiteboard', '白板', 1, 'normal'),
-(3, 'projector', '投影仪', 2, 'normal'),
-(3, 'microphone', '麦克风', 2, 'normal'),
-(4, 'blackboard', '黑板', 1, 'normal'),
-(5, 'computer', '学生电脑', 50, 'normal');
+INSERT INTO equipment (equipment_code, name, classroom_id, equipment_type, quantity, status) VALUES
+('EQ001', 'A101投影仪', 1, 'projector', 1, 'normal'),
+('EQ002', 'A101教师电脑', 1, 'computer', 1, 'normal'),
+('EQ003', 'A101空调', 1, 'ac', 4, 'normal'),
+('EQ004', 'A101音响', 1, 'speaker', 2, 'normal'),
+('EQ005', 'A102投影仪', 2, 'projector', 1, 'normal'),
+('EQ006', 'A102白板', 2, 'whiteboard', 1, 'normal'),
+('EQ007', 'A201投影仪', 3, 'projector', 2, 'normal'),
+('EQ008', 'A201麦克风', 3, 'microphone', 2, 'normal'),
+('EQ009', 'B101黑板', 4, 'blackboard', 1, 'normal'),
+('EQ010', 'B102电脑', 5, 'computer', 50, 'normal'),
+('EQ011', 'C301多媒体', 6, 'multimedia', 1, 'normal');
 
 -- 班级
 INSERT INTO class_info (class_code, class_name, major, grade, student_count) VALUES

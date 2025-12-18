@@ -20,6 +20,7 @@ public:
                  unsigned int port = 3306);
     void disconnect();
     bool isConnected() const;
+    bool ensureConnected();  // 检查连接并自动重连
     
     // 执行查询并返回结果
     DbResult query(const std::string& sql);
