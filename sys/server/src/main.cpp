@@ -348,6 +348,44 @@ void handleCreateCourse(const HttpRequest& req, HttpResponse& res) {
     }
 }
 
+void handleUpdateCourse(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto params = Json::parse(req.body);
+    auto& db = Database::getInstance();
+    
+    std::string sql = "UPDATE course SET course_code = '" + db.escape(params["course_code"]) + "', "
+        "name = '" + db.escape(params["name"]) + "', "
+        "teacher_id = " + (params["teacher_id"].empty() ? "NULL" : params["teacher_id"]) + ", "
+        "credits = " + (params["credits"].empty() ? "NULL" : params["credits"]) + ", "
+        "hours = " + (params["hours"].empty() ? "NULL" : params["hours"]) + ", "
+        "course_type = '" + (params["course_type"].empty() ? "required" : db.escape(params["course_type"])) + "', "
+        "capacity = " + (params["capacity"].empty() ? "NULL" : params["capacity"]) + " "
+        "WHERE id = " + id;
+    
+    if (db.execute(sql)) {
+        res.setJson("{\"success\": true}");
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"更新失败: " + db.getError() + "\"}");
+    }
+}
+
+void handleDeleteCourse(const HttpRequest& req, HttpResponse& res) {
+    std::string id = req.params.at("id");
+    auto& db = Database::getInstance();
+    
+    // 先删除相关的排课记录
+    db.execute("DELETE FROM schedule WHERE course_id = " + id);
+    
+    std::string sql = "DELETE FROM course WHERE id = " + id;
+    if (db.execute(sql)) {
+        res.setStatus(204);
+    } else {
+        res.setStatus(400);
+        res.setJson("{\"error\": \"删除失败: " + db.getError() + "\"}");
+    }
+}
+
 // ========== 排课管理 ==========
 void handleGetSchedules(const HttpRequest& req, HttpResponse& res) {
     auto& db = Database::getInstance();
@@ -1210,6 +1248,8 @@ int main() {
     server.get("/api/courses", handleGetCourses);
     server.get("/api/courses/:id", handleGetCourse);
     server.post("/api/courses", handleCreateCourse);
+    server.put("/api/courses/:id", handleUpdateCourse);
+    server.del("/api/courses/:id", handleDeleteCourse);
     
     // 排课管理
     server.get("/api/schedules", handleGetSchedules);

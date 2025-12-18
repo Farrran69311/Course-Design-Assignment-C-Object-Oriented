@@ -54,21 +54,41 @@ void Database::disconnect() {
 }
 
 bool Database::isConnected() const {
-    return connected_ && mysql_ping(conn_) == 0;
+    return connected_ && conn_ && mysql_ping(conn_) == 0;
 }
 
 // 检查并重连
 bool Database::ensureConnected() {
-    if (!connected_ || !conn_) return false;
+    if (!conn_) return false;
     
+    // 尝试ping，如果失败则重连
     if (mysql_ping(conn_) != 0) {
         std::cerr << "MySQL连接已断开，尝试重连..." << std::endl;
-        // mysql_ping会自动重连（如果设置了MYSQL_OPT_RECONNECT）
-        if (mysql_ping(conn_) != 0) {
-            std::cerr << "MySQL重连失败: " << mysql_error(conn_) << std::endl;
+        
+        // 手动重新连接
+        mysql_close(conn_);
+        conn_ = mysql_init(nullptr);
+        if (!conn_) {
+            std::cerr << "MySQL重新初始化失败" << std::endl;
+            connected_ = false;
             return false;
         }
+        
+        // 重新设置选项
+        mysql_options(conn_, MYSQL_SET_CHARSET_NAME, "utf8mb4");
+        bool reconnect = true;
+        mysql_options(conn_, MYSQL_OPT_RECONNECT, &reconnect);
+        
+        // 重新连接（使用默认的连接参数）
+        if (!mysql_real_connect(conn_, "localhost", "root", "@123Fengaoran",
+                                "classroom_system", 3306, nullptr, 0)) {
+            std::cerr << "MySQL重连失败: " << mysql_error(conn_) << std::endl;
+            connected_ = false;
+            return false;
+        }
+        
         std::cout << "MySQL重连成功" << std::endl;
+        connected_ = true;
     }
     return true;
 }
