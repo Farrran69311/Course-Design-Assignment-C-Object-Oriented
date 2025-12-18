@@ -5,6 +5,26 @@ let currentUser = null;
 let categoryChart = null;
 let loadingCount = 0;
 
+// ========== 图表颜色配置 ==========
+function getChartTextColor() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#666';
+}
+
+function getChartOptions() {
+    const textColor = getChartTextColor();
+    return {
+        plugins: {
+            legend: {
+                labels: { color: textColor }
+            }
+        },
+        scales: {
+            x: { ticks: { color: textColor } },
+            y: { ticks: { color: textColor } }
+        }
+    };
+}
+
 // ========== 分页配置 ==========
 const PAGE_SIZE = 10; // 每页显示条数
 let paginationState = {
@@ -932,6 +952,7 @@ async function initDashboard() {
         
         const ctx = document.getElementById('categoryChart').getContext('2d');
         if (categoryChart) categoryChart.destroy();
+        const textColor = getChartTextColor();
         categoryChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -945,7 +966,8 @@ async function initDashboard() {
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: { color: textColor }
                     }
                 }
             }
@@ -1778,14 +1800,18 @@ async function loadStatistics() {
         utilization.forEach(u => {
             const rate = parseFloat(u.utilization_rate) || 0;
             const barColor = rate > 70 ? '#28a745' : rate > 40 ? '#fd7e14' : '#dc3545';
+            // 百分比文字放在进度条外面，避免窄进度条看不清
             html += `<tr>
                 <td>${u.classroom_code}</td>
                 <td>${u.classroom_name}</td>
                 <td>${getCategoryName(u.category)}</td>
                 <td>${u.used_slots || 0}</td>
                 <td>
-                    <div class="progress" style="height: 18px; min-width: 100px;">
-                        <div class="progress-bar" style="width: ${rate}%; background-color: ${barColor};">${rate.toFixed(0)}%</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress flex-grow-1" style="height: 18px; min-width: 80px;">
+                            <div class="progress-bar" style="width: ${Math.max(rate, 3)}%; background-color: ${barColor};"></div>
+                        </div>
+                        <span class="fw-bold" style="min-width: 45px; color: ${barColor}; font-size: 14px;">${rate.toFixed(1)}%</span>
                     </div>
                 </td>
             </tr>`;
@@ -1820,6 +1846,7 @@ function renderClassroomStatusChart(classrooms) {
     const ctx = document.getElementById('classroomStatusChart');
     if (statisticsCharts.status) statisticsCharts.status.destroy();
     
+    const textColor = getChartTextColor();
     statisticsCharts.status = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -1832,7 +1859,10 @@ function renderClassroomStatusChart(classrooms) {
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'bottom' }
+                legend: { 
+                    position: 'bottom',
+                    labels: { color: textColor }
+                }
             }
         }
     });
@@ -1851,6 +1881,7 @@ function renderWeeklyScheduleChart(schedules) {
     const ctx = document.getElementById('weeklyScheduleChart');
     if (statisticsCharts.weekly) statisticsCharts.weekly.destroy();
     
+    const textColor = getChartTextColor();
     statisticsCharts.weekly = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1863,8 +1894,21 @@ function renderWeeklyScheduleChart(schedules) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            plugins: { 
+                legend: { 
+                    display: false,
+                    labels: { color: textColor }
+                } 
+            },
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { stepSize: 1, color: textColor }
+                },
+                x: {
+                    ticks: { color: textColor }
+                }
+            }
         }
     });
 }
@@ -3113,6 +3157,20 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     applyTheme(newTheme);
     updateThemeIcon(newTheme);
+    
+    // 重新渲染图表以更新颜色
+    refreshChartsForTheme();
+}
+
+function refreshChartsForTheme() {
+    // 重新渲染当前页面的图表
+    const currentPage = document.querySelector('.nav-item.active')?.dataset.page;
+    if (currentPage === 'dashboard') {
+        // 仪表盘图表需要重新加载
+        initDashboard();
+    } else if (currentPage === 'statistics') {
+        loadStatistics();
+    }
 }
 
 function updateThemeIcon(theme) {
@@ -3178,7 +3236,7 @@ function renderQuickSearchResults(searchValue) {
     
     if (filteredModules.length === 0) {
         resultsContainer.innerHTML = `
-            <div style="padding: 40px 20px; text-align: center; color: #999;">
+            <div class="text-center text-muted" style="padding: 40px 20px;">
                 <i class="bi bi-search" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
                 <p>未找到匹配的项目</p>
             </div>

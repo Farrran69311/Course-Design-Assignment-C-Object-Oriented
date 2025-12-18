@@ -7,7 +7,7 @@ Database& Database::getInstance() {
     return instance;
 }
 
-Database::Database() : conn_(nullptr), connected_(false) {
+Database::Database() : conn_(nullptr), connected_(false), port_(3306) {
     conn_ = mysql_init(nullptr);
     if (!conn_) {
         throw std::runtime_error("MySQL init failed");
@@ -24,8 +24,17 @@ Database::~Database() {
 bool Database::connect(const std::string& host, const std::string& user,
                        const std::string& password, const std::string& database,
                        unsigned int port) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    
+    // 保存连接参数用于重连
+    host_ = host;
+    user_ = user;
+    password_ = password;
+    database_ = database;
+    port_ = port;
+    
     if (connected_) {
-        disconnect();
+        connected_ = false;
     }
     
     // 设置字符集
@@ -34,6 +43,12 @@ bool Database::connect(const std::string& host, const std::string& user,
     // 设置自动重连
     bool reconnect = true;
     mysql_options(conn_, MYSQL_OPT_RECONNECT, &reconnect);
+    
+    // 设置连接超时
+    unsigned int timeout = 10;
+    mysql_options(conn_, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+    mysql_options(conn_, MYSQL_OPT_READ_TIMEOUT, &timeout);
+    mysql_options(conn_, MYSQL_OPT_WRITE_TIMEOUT, &timeout);
     
     if (!mysql_real_connect(conn_, host.c_str(), user.c_str(), password.c_str(),
                             database.c_str(), port, nullptr, 0)) {
@@ -47,18 +62,22 @@ bool Database::connect(const std::string& host, const std::string& user,
 }
 
 void Database::disconnect() {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (connected_ && conn_) {
-        // mysql_close会在析构函数中调用
         connected_ = false;
     }
 }
 
 bool Database::isConnected() const {
+    std::lock_guard<std::mutex> lock(mutex_);
     return connected_ && conn_ && mysql_ping(conn_) == 0;
 }
 
-// 检查并重连
+// 检查并重连 (内部方法，调用前必须已持有锁)
 bool Database::ensureConnected() {
+    // 注意：此方法由 query/execute 调用，它们已经持有锁
+    // 不要在这里再次加锁，否则会死锁
+    
     if (!conn_) return false;
     
     // 尝试ping，如果失败则重连
@@ -79,9 +98,18 @@ bool Database::ensureConnected() {
         bool reconnect = true;
         mysql_options(conn_, MYSQL_OPT_RECONNECT, &reconnect);
         
-        // 重新连接（使用默认的连接参数）
-        if (!mysql_real_connect(conn_, "localhost", "root", "@123Fengaoran",
-                                "classroom_system", 3306, nullptr, 0)) {
+        unsigned int timeout = 10;
+        mysql_options(conn_, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+        mysql_options(conn_, MYSQL_OPT_READ_TIMEOUT, &timeout);
+        mysql_options(conn_, MYSQL_OPT_WRITE_TIMEOUT, &timeout);
+        
+        // 使用保存的连接参数重连
+        const char* host = host_.empty() ? "localhost" : host_.c_str();
+        const char* user = user_.empty() ? "root" : user_.c_str();
+        const char* pwd = password_.empty() ? "@123Fengaoran" : password_.c_str();
+        const char* db = database_.empty() ? "classroom_system" : database_.c_str();
+        
+        if (!mysql_real_connect(conn_, host, user, pwd, db, port_, nullptr, 0)) {
             std::cerr << "MySQL重连失败: " << mysql_error(conn_) << std::endl;
             connected_ = false;
             return false;
@@ -94,6 +122,7 @@ bool Database::ensureConnected() {
 }
 
 DbResult Database::query(const std::string& sql) {
+    std::lock_guard<std::mutex> lock(mutex_);
     DbResult result;
     
     if (!ensureConnected()) {
@@ -134,6 +163,8 @@ DbResult Database::query(const std::string& sql) {
 }
 
 bool Database::execute(const std::string& sql) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    
     if (!ensureConnected()) {
         std::cerr << "数据库未连接" << std::endl;
         return false;
@@ -148,14 +179,17 @@ bool Database::execute(const std::string& sql) {
 }
 
 unsigned long long Database::lastInsertId() const {
+    std::lock_guard<std::mutex> lock(mutex_);
     return mysql_insert_id(conn_);
 }
 
 unsigned long long Database::affectedRows() const {
+    std::lock_guard<std::mutex> lock(mutex_);
     return mysql_affected_rows(conn_);
 }
 
 std::string Database::escape(const std::string& str) {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!conn_) return str;
     
     std::vector<char> buffer(str.size() * 2 + 1);
@@ -164,5 +198,6 @@ std::string Database::escape(const std::string& str) {
 }
 
 std::string Database::getError() const {
+    std::lock_guard<std::mutex> lock(mutex_);
     return conn_ ? mysql_error(conn_) : "No connection";
 }
