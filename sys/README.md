@@ -180,4 +180,22 @@ server.start(8080);
 
 ## License
 
-MIT License
+LICENSE AGREEMENT
+Copyright (C) 2025 FengRR. All Rights Reserved.
+
+1. OWNERSHIP
+   This software and its source code are the exclusive property of FengRR.
+   本软件及其源代码均为 FengRR 的私有财产。
+
+2. RESTRICTIONS
+   - Unauthorized copying, distribution, modification, or commercial use of this software is strictly prohibited.
+   - 严禁未经授权的复制、分发、修改或商业使用。
+   - It is forbidden to bypass, reverse engineer, or tamper with the security certificate mechanism included in this software.
+   - 禁止绕过、反向工程或篡改本软件中包含的安全证书机制。
+
+3. SECURITY
+   This software is protected by a technical security lock. Usage is permitted only with a valid 'security.lic' certificate issued by the author.
+   本软件受技术安全锁保护，仅允许持有作者颁发的有效 'security.lic' 证书时使用。
+
+4. DISCLAIMER
+   THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
