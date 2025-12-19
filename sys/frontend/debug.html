@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pet Debug</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .test-box { 
+            position: fixed; 
+            width: 100px; 
+            height: 100px; 
+            background: #FF6B6B;
+            cursor: grab;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        #debug-log {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: #2d3654;
+            color: #00FF00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-log">初始化中...</div>
+    <div id="test-pet" class="test-box">拖我</div>
+    
+    <script>
+        const debugLog = document.getElementById('debug-log');
+        const testBox = document.getElementById('test-pet');
+        let isDragging = false;
+        let startX, startY;
+        
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<div>[${time}] ${msg}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        log('✅ 页面已加载');
+        log('📦 找到测试盒: ' + (testBox ? '是' : '否'));
+        
+        testBox.addEventListener('mousedown', function(e) {
+            log('🖱️ mousedown 触发');
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                testBox.style.left = (e.clientX - 50) + 'px';
+                testBox.style.top = (e.clientY - 50) + 'px';
+                log(`📍 移动: X=${Math.round(e.clientX)}, Y=${Math.round(e.clientY)}`);
+            }
+        });
+        
+        document.addEventListener('mouseup', function(e) {
+            if (isDragging) {
+                log('🔴 mouseup 触发 - 拖拽结束');
+                isDragging = false;
+            }
+        });
+        
+        testBox.style.left = '100px';
+        testBox.style.top = '200px';
+        log('✅ 事件绑定完成');
+    </script>
+</body>
+</html>

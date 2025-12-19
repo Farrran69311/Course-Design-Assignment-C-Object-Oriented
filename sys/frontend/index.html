@@ -3913,6 +3913,39 @@ student2,学生2,student,student2@example.com"></textarea>
         </div>
     </div>
 
+    <!-- ===== 桌宠场景元素 ===== -->
+    <!-- 草莓丛 -->
+    <div id="strawberry-bush" class="pet-scene strawberry-bush">
+        <div class="strawberry s1">🍓</div>
+        <div class="strawberry s2">🍓</div>
+        <div class="strawberry s3">🍓</div>
+        <div class="bush-leaves">🌿</div>
+    </div>
+    
+    <!-- 浴缸 -->
+    <div id="bathtub" class="pet-scene bathtub">
+        <div class="bathtub-body">
+            <div class="bathtub-water">
+                <div class="bubble b1"></div>
+                <div class="bubble b2"></div>
+                <div class="bubble b3"></div>
+            </div>
+            <div class="bathtub-foam"></div>
+        </div>
+        <div class="bathtub-tap"></div>
+    </div>
+    
+    <!-- 烤箱 -->
+    <div id="toaster-oven" class="pet-scene toaster-oven">
+        <div class="oven-body">
+            <div class="oven-window">
+                <div class="oven-glow"></div>
+            </div>
+            <div class="oven-dial"></div>
+        </div>
+        <div class="oven-slot"></div>
+    </div>
+
     <!-- ===== 桌宠容器 - 小吐司 ===== -->
     <div id="desktop-pet" class="desktop-pet" title="点击我互动~">
         <div class="pet-body">
@@ -3922,26 +3955,43 @@ student2,学生2,student,student2@example.com"></textarea>
                 <div class="toast-crust"></div>
                 <!-- 吐司面包芯 -->
                 <div class="toast-inner">
+                    <!-- 面包纹理 -->
+                    <div class="toast-texture"></div>
                     <!-- 表情 -->
                     <div class="toast-face">
+                        <!-- 眉毛 -->
+                        <div class="toast-brows">
+                            <div class="toast-brow left"></div>
+                            <div class="toast-brow right"></div>
+                        </div>
                         <div class="toast-eyes">
                             <div class="toast-eye left">
                                 <div class="toast-pupil"></div>
+                                <div class="toast-eye-shine"></div>
                             </div>
                             <div class="toast-eye right">
                                 <div class="toast-pupil"></div>
+                                <div class="toast-eye-shine"></div>
                             </div>
                         </div>
-                        <div class="toast-mouth"></div>
+                        <div class="toast-mouth">
+                            <div class="toast-tongue"></div>
+                        </div>
                         <div class="toast-blush left"></div>
                         <div class="toast-blush right"></div>
                     </div>
                 </div>
+                <!-- 装饰 - 黄油/果酱 -->
+                <div class="toast-topping" id="toastTopping"></div>
             </div>
             <!-- 小手 -->
             <div class="toast-arms">
-                <div class="toast-arm left"></div>
-                <div class="toast-arm right"></div>
+                <div class="toast-arm left">
+                    <div class="toast-hand"></div>
+                </div>
+                <div class="toast-arm right">
+                    <div class="toast-hand"></div>
+                </div>
             </div>
             <!-- 小脚 -->
             <div class="toast-feet">
@@ -3954,13 +4004,21 @@ student2,学生2,student,student2@example.com"></textarea>
         <!-- 对话气泡 -->
         <div class="pet-speech-bubble" id="petSpeechBubble">
             <span id="petSpeechText">你好呀！</span>
+            <div class="speech-emoji" id="speechEmoji"></div>
         </div>
         <!-- 状态指示器 -->
         <div class="pet-status-indicator" id="petStatusIndicator">
             <i class="bi bi-heart-fill"></i>
         </div>
-        <!-- 装饰 - 黄油/果酱 -->
-        <div class="toast-topping" id="toastTopping"></div>
+        <!-- 特效层 -->
+        <div class="pet-effects">
+            <div class="sweat-drop" id="sweatDrop">💧</div>
+            <div class="heart-pop" id="heartPop">❤️</div>
+            <div class="star-pop" id="starPop">⭐</div>
+            <div class="steam" id="steam">♨️</div>
+        </div>
+        <!-- 手持物品 -->
+        <div class="held-item" id="heldItem"></div>
     </div>
 
     <!-- 桌宠菜单 -->
@@ -3976,20 +4034,20 @@ student2,学生2,student,student2@example.com"></textarea>
             <div class="pet-menu-item" onclick="petAction('summary')">
                 <i class="bi bi-clipboard-data"></i> 今日概览
             </div>
-            <div class="pet-menu-item" onclick="petAction('remind')">
-                <i class="bi bi-bell"></i> 查看提醒
+            <div class="pet-menu-item" onclick="petAction('pickStrawberry')">
+                <i class="bi bi-flower1"></i> 采草莓
             </div>
-            <div class="pet-menu-item" onclick="petAction('weather')">
-                <i class="bi bi-cloud-sun"></i> 天气心情
+            <div class="pet-menu-item" onclick="petAction('bath')">
+                <i class="bi bi-droplet"></i> 泡澡澡
+            </div>
+            <div class="pet-menu-item" onclick="petAction('toast')">
+                <i class="bi bi-fire"></i> 去烤箱
+            </div>
+            <div class="pet-menu-item" onclick="petAction('hideEdge')">
+                <i class="bi bi-box-arrow-right"></i> 躲边边
             </div>
             <div class="pet-menu-item" onclick="petAction('encourage')">
                 <i class="bi bi-emoji-smile"></i> 鼓励一下
-            </div>
-            <div class="pet-menu-item" onclick="petAction('topping')">
-                <i class="bi bi-palette"></i> 换个配料
-            </div>
-            <div class="pet-menu-item" onclick="petAction('sleep')">
-                <i class="bi bi-moon-stars"></i> 休息模式
             </div>
             <div class="pet-menu-item" onclick="petAction('settings')">
                 <i class="bi bi-gear"></i> 设置
@@ -3998,7 +4056,7 @@ student2,学生2,student,student2@example.com"></textarea>
         <div class="pet-menu-footer">
             <div class="pet-stats">
                 <span>❤️ <span id="petHappiness">100</span></span>
-                <span>⚡ <span id="petEnergy">100</span></span>
+                <span>🔥 <span id="petToastLevel">0</span>%</span>
             </div>
         </div>
     </div>
@@ -4017,33 +4075,24 @@ student2,学生2,student,student2@example.com"></textarea>
                         <input type="text" class="form-control" id="petNameInput" value="小吐司" maxlength="10">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">显示位置</label>
-                        <select class="form-select" id="petPositionSelect">
-                            <option value="bottom-right">右下角</option>
-                            <option value="bottom-left">左下角</option>
-                            <option value="top-right">右上角</option>
-                            <option value="top-left">左上角</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label">互动频率</label>
                         <select class="form-select" id="petInteractionFreq">
-                            <option value="high">高（经常说话）</option>
+                            <option value="high">高（经常活动）</option>
                             <option value="medium" selected>中等</option>
                             <option value="low">低（安静模式）</option>
                         </select>
                     </div>
                     <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="petSoundEnabled">
-                        <label class="form-check-label" for="petSoundEnabled">启用音效</label>
-                    </div>
-                    <div class="form-check form-switch mb-2">
                         <input class="form-check-input" type="checkbox" id="petNotifyEnabled" checked>
                         <label class="form-check-label" for="petNotifyEnabled">系统通知提醒</label>
                     </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="petAutoActivity" checked>
+                        <label class="form-check-label" for="petAutoActivity">自动小剧场（无操作时）</label>
+                    </div>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="petAutoSleep" checked>
-                        <label class="form-check-label" for="petAutoSleep">自动休眠（无操作5分钟）</label>
+                        <input class="form-check-input" type="checkbox" id="petPhysicsEnabled" checked>
+                        <label class="form-check-label" for="petPhysicsEnabled">物理效果</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -4055,48 +4104,227 @@ student2,学生2,student,student2@example.com"></textarea>
     </div>
 
     <style>
-        /* ===== 小吐司桌宠样式 ===== */
+        /* ===== 场景元素样式 ===== */
+        .pet-scene {
+            position: fixed;
+            z-index: 9997;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+        
+        .pet-scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 草莓丛 */
+        .strawberry-bush {
+            bottom: 20px;
+            left: 100px;
+            font-size: 20px;
+        }
+        
+        .strawberry {
+            position: absolute;
+            animation: strawberryBob 2s ease-in-out infinite;
+        }
+        
+        .strawberry.s1 { left: 0; bottom: 10px; animation-delay: 0s; }
+        .strawberry.s2 { left: 20px; bottom: 15px; animation-delay: 0.3s; }
+        .strawberry.s3 { left: 40px; bottom: 8px; animation-delay: 0.6s; }
+        .bush-leaves { position: absolute; bottom: 0; left: 10px; font-size: 25px; }
+        
+        @keyframes strawberryBob {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-3px) rotate(5deg); }
+        }
+        
+        /* 浴缸 */
+        .bathtub {
+            bottom: 20px;
+            left: 200px;
+            width: 80px;
+            height: 50px;
+        }
+        
+        .bathtub-body {
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(180deg, #E8E8E8 0%, #D0D0D0 100%);
+            border-radius: 5px 5px 20px 20px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #B0B0B0;
+        }
+        
+        .bathtub-water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: linear-gradient(180deg, rgba(135, 206, 250, 0.8) 0%, rgba(70, 130, 180, 0.8) 100%);
+            animation: waterWave 2s ease-in-out infinite;
+        }
+        
+        @keyframes waterWave {
+            0%, 100% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+        }
+        
+        .bubble {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            animation: bubbleFloat 2s ease-in-out infinite;
+        }
+        
+        .bubble.b1 { left: 10px; animation-delay: 0s; }
+        .bubble.b2 { left: 35px; animation-delay: 0.5s; }
+        .bubble.b3 { left: 55px; animation-delay: 1s; }
+        
+        @keyframes bubbleFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-20px) scale(0.5); opacity: 0; }
+        }
+        
+        .bathtub-foam {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            height: 15px;
+            background: radial-gradient(circle at 10% 50%, white 8px, transparent 8px),
+                        radial-gradient(circle at 30% 50%, white 10px, transparent 10px),
+                        radial-gradient(circle at 50% 50%, white 8px, transparent 8px),
+                        radial-gradient(circle at 70% 50%, white 10px, transparent 10px),
+                        radial-gradient(circle at 90% 50%, white 8px, transparent 8px);
+        }
+        
+        .bathtub-tap {
+            position: absolute;
+            top: -15px;
+            right: 10px;
+            width: 15px;
+            height: 20px;
+            background: linear-gradient(90deg, #C0C0C0, #A0A0A0);
+            border-radius: 3px;
+        }
+        
+        /* 烤箱 */
+        .toaster-oven {
+            bottom: 20px;
+            right: 150px;
+            width: 70px;
+            height: 55px;
+        }
+        
+        .oven-body {
+            width: 70px;
+            height: 50px;
+            background: linear-gradient(180deg, #4A4A4A 0%, #2A2A2A 100%);
+            border-radius: 8px;
+            position: relative;
+            border: 2px solid #1A1A1A;
+        }
+        
+        .oven-window {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            height: 25px;
+            background: #1A1A1A;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .oven-glow {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            transition: background 0.5s ease;
+        }
+        
+        .toaster-oven.heating .oven-glow {
+            background: linear-gradient(180deg, rgba(255, 100, 0, 0.8) 0%, rgba(255, 50, 0, 0.6) 100%);
+            animation: ovenGlow 0.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes ovenGlow {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .oven-dial {
+            position: absolute;
+            bottom: 8px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+        
+        .oven-slot {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 8px;
+            background: #1A1A1A;
+            border-radius: 2px;
+        }
+
+        /* ===== 小吐司桌宠样式 - 增强版 ===== */
         .desktop-pet {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 70px;
-            height: 90px;
+            width: 80px;
+            height: 100px;
             cursor: grab;
             z-index: 9999;
             user-select: none;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.8s ease, right 0.8s ease, bottom 0.8s ease;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25));
         }
         
         .desktop-pet:active {
             cursor: grabbing;
         }
         
-        .desktop-pet:hover {
-            transform: scale(1.08);
+        .desktop-pet:hover:not(.dragging):not(.busy) {
+            transform: scale(1.05);
         }
         
         .pet-body {
             position: relative;
             width: 100%;
             height: 100%;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        /* 吐司本体 */
+        /* 吐司本体 - 美化版 */
         .toast-body {
             position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
-            height: 65px;
-            border-radius: 8px 8px 5px 5px;
-            overflow: hidden;
-            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.1);
+            width: 65px;
+            height: 70px;
+            border-radius: 12px 12px 8px 8px;
+            overflow: visible;
+            transition: all 0.3s ease;
         }
         
-        /* 吐司焦边 */
+        /* 吐司焦边 - 更细腻的渐变 */
         .toast-crust {
             position: absolute;
             top: 0;
@@ -4104,25 +4332,64 @@ student2,学生2,student,student2@example.com"></textarea>
             right: 0;
             bottom: 0;
             background: linear-gradient(180deg, 
-                #D4A574 0%, 
-                #C49A6C 15%,
-                #E8D4B8 20%,
+                #C49A6C 0%, 
+                #D4A574 8%,
+                #E8C9A0 15%,
+                #F5E6D3 25%,
+                #FFF8F0 50%,
                 #F5E6D3 100%
             );
-            border-radius: 8px 8px 5px 5px;
-            border: 3px solid #C49A6C;
-            border-bottom-width: 4px;
+            border-radius: 12px 12px 8px 8px;
+            border: 3px solid #B8956A;
+            box-shadow: 
+                inset 0 -4px 0 rgba(0,0,0,0.08),
+                inset 0 2px 4px rgba(255,255,255,0.5),
+                0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        /* 烤糊状态 */
+        .desktop-pet.burnt .toast-crust {
+            background: linear-gradient(180deg, 
+                #4A3728 0%, 
+                #5D442F 8%,
+                #6B5035 15%,
+                #8B6914 25%,
+                #A07D3A 50%,
+                #8B6914 100%
+            );
+            border-color: #3A2A1A;
         }
         
         /* 吐司内芯 */
         .toast-inner {
             position: absolute;
-            top: 12px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
+            top: 14px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
             background: linear-gradient(180deg, #FFF8E7 0%, #F5E6D3 100%);
-            border-radius: 3px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .desktop-pet.burnt .toast-inner {
+            background: linear-gradient(180deg, #C4A060 0%, #A08040 100%);
+        }
+        
+        /* 面包纹理 */
+        .toast-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(200,180,150,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 60% 20%, rgba(200,180,150,0.1) 1.5px, transparent 1.5px),
+                radial-gradient(circle at 80% 60%, rgba(200,180,150,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 30% 70%, rgba(200,180,150,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 70% 80%, rgba(200,180,150,0.1) 1.5px, transparent 1.5px);
         }
         
         /* 表情区域 */
@@ -4132,199 +4399,394 @@ student2,学生2,student,student2@example.com"></textarea>
             height: 100%;
         }
         
-        /* 眼睛 */
-        .toast-eyes {
+        /* 眉毛 */
+        .toast-brows {
             position: absolute;
-            top: 12px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 12px;
+            gap: 18px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .toast-brow {
+            width: 8px;
+            height: 3px;
+            background: #5D4037;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+        
+        /* 难色时显示眉毛 */
+        .desktop-pet.worried .toast-brows {
+            opacity: 1;
+        }
+        
+        .desktop-pet.worried .toast-brow.left {
+            transform: rotate(15deg);
+        }
+        
+        .desktop-pet.worried .toast-brow.right {
+            transform: rotate(-15deg);
+        }
+        
+        /* 眼睛 - 更可爱 */
+        .toast-eyes {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
         }
         
         .toast-eye {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background: #2D2D2D;
             border-radius: 50%;
             position: relative;
+            transition: all 0.15s ease;
         }
         
         .toast-pupil {
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             background: white;
             border-radius: 50%;
             position: absolute;
             top: 2px;
             right: 2px;
-            transition: all 0.1s ease;
+            transition: all 0.08s ease;
         }
         
-        /* 嘴巴 */
+        .toast-eye-shine {
+            width: 2px;
+            height: 2px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            left: 3px;
+        }
+        
+        /* 嘴巴 - 更丰富表情 */
         .toast-mouth {
             position: absolute;
-            bottom: 10px;
+            bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 8px;
-            height: 4px;
+            width: 10px;
+            height: 5px;
             background: #E57373;
             border-radius: 0 0 10px 10px;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .toast-tongue {
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 4px;
+            background: #FF8A80;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        /* 开心时露舌头 */
+        .desktop-pet.happy .toast-tongue {
+            opacity: 1;
+            bottom: 0;
+        }
+        
+        /* 腮红 - 更自然 */
+        .toast-blush {
+            position: absolute;
+            bottom: 10px;
+            width: 10px;
+            height: 6px;
+            background: radial-gradient(ellipse, rgba(255, 150, 150, 0.7) 0%, transparent 70%);
+            border-radius: 50%;
             transition: all 0.3s ease;
         }
         
-        /* 腮红 */
-        .toast-blush {
-            position: absolute;
-            bottom: 12px;
-            width: 8px;
-            height: 5px;
-            background: rgba(255, 150, 150, 0.6);
-            border-radius: 50%;
-        }
+        .toast-blush.left { left: 0px; }
+        .toast-blush.right { right: 0px; }
         
-        .toast-blush.left { left: 2px; }
-        .toast-blush.right { right: 2px; }
-        
-        /* 小手 */
-        .toast-arms {
-            position: absolute;
-            top: 40px;
-            width: 100%;
-        }
-        
-        .toast-arm {
-            position: absolute;
-            width: 10px;
-            height: 15px;
-            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
-            border: 2px solid #C49A6C;
-            border-radius: 5px;
-        }
-        
-        .toast-arm.left {
-            left: 0;
-            transform: rotate(-15deg);
-            transform-origin: top right;
-        }
-        
-        .toast-arm.right {
-            right: 0;
-            transform: rotate(15deg);
-            transform-origin: top left;
-        }
-        
-        /* 小脚 */
-        .toast-feet {
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-        }
-        
-        .toast-foot {
-            width: 14px;
+        /* 害羞时腮红加深 */
+        .desktop-pet.shy .toast-blush {
+            background: radial-gradient(ellipse, rgba(255, 100, 100, 0.9) 0%, transparent 70%);
+            width: 12px;
             height: 8px;
-            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
-            border: 2px solid #C49A6C;
-            border-radius: 3px 3px 5px 5px;
         }
         
         /* 配料 */
         .toast-topping {
             position: absolute;
-            top: 8px;
+            top: 6px;
             left: 50%;
             transform: translateX(-50%);
-            width: 30px;
-            height: 8px;
-            border-radius: 2px;
+            width: 35px;
+            height: 10px;
+            border-radius: 3px;
             opacity: 0;
             transition: all 0.3s ease;
+            z-index: 5;
         }
         
         .toast-topping.butter {
             background: linear-gradient(180deg, #FFE566 0%, #FFD700 100%);
-            box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+            box-shadow: 0 2px 4px rgba(255, 215, 0, 0.5);
             opacity: 1;
         }
         
         .toast-topping.jam {
             background: linear-gradient(180deg, #FF6B6B 0%, #C0392B 100%);
-            box-shadow: 0 2px 4px rgba(192, 57, 43, 0.4);
+            box-shadow: 0 2px 4px rgba(192, 57, 43, 0.5);
             opacity: 1;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            top: 5px;
+            border-radius: 50% 50% 40% 40%;
+            width: 28px;
+            height: 18px;
+            top: 4px;
         }
         
         .toast-topping.honey {
             background: linear-gradient(180deg, #F4A460 0%, #D2691E 100%);
-            box-shadow: 0 2px 4px rgba(210, 105, 30, 0.4);
+            box-shadow: 0 2px 4px rgba(210, 105, 30, 0.5);
             opacity: 1;
-            width: 25px;
-            height: 12px;
+            width: 30px;
+            height: 14px;
             border-radius: 50%;
         }
         
         .toast-topping.chocolate {
-            background: linear-gradient(180deg, #8B4513 0%, #5D3A1A 100%);
-            box-shadow: 0 2px 4px rgba(93, 58, 26, 0.4);
+            background: linear-gradient(180deg, #6B4423 0%, #4A2C17 100%);
+            box-shadow: 0 2px 4px rgba(74, 44, 23, 0.5);
             opacity: 1;
-            width: 28px;
+            width: 32px;
+        }
+        
+        /* 小手 - 更精致 */
+        .toast-arms {
+            position: absolute;
+            top: 42px;
+            width: 100%;
+            pointer-events: none;
+        }
+        
+        .toast-arm {
+            position: absolute;
+            width: 12px;
+            height: 18px;
+            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
+            border: 2px solid #C49A6C;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .toast-arm.left {
+            left: 2px;
+            transform: rotate(-20deg);
+            transform-origin: top right;
+        }
+        
+        .toast-arm.right {
+            right: 2px;
+            transform: rotate(20deg);
+            transform-origin: top left;
+        }
+        
+        .toast-hand {
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 6px;
+            background: #F5E6D3;
+            border: 2px solid #C49A6C;
+            border-radius: 50%;
+        }
+        
+        /* 小脚 */
+        .toast-feet {
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toast-foot {
+            width: 16px;
+            height: 10px;
+            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
+            border: 2px solid #C49A6C;
+            border-radius: 4px 4px 8px 8px;
+            transition: all 0.15s ease;
         }
         
         /* 影子 */
         .pet-shadow {
             position: absolute;
-            bottom: 0;
+            bottom: -2px;
             left: 50%;
             transform: translateX(-50%);
-            width: 45px;
-            height: 8px;
+            width: 50px;
+            height: 10px;
             background: rgba(0, 0, 0, 0.15);
             border-radius: 50%;
-            filter: blur(2px);
+            filter: blur(3px);
+            transition: all 0.3s ease;
+        }
+        
+        /* 特效层 */
+        .pet-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .sweat-drop, .heart-pop, .star-pop, .steam {
+            position: absolute;
+            opacity: 0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .sweat-drop {
+            top: 5px;
+            right: -5px;
+        }
+        
+        .sweat-drop.show {
+            opacity: 1;
+            animation: sweatDrip 0.8s ease-out;
+        }
+        
+        @keyframes sweatDrip {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(15px) scale(0.5); opacity: 0; }
+        }
+        
+        .heart-pop {
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .heart-pop.show {
+            animation: heartFloat 1s ease-out forwards;
+        }
+        
+        @keyframes heartFloat {
+            0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.5); }
+            50% { opacity: 1; transform: translateX(-50%) translateY(-15px) scale(1.2); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-25px) scale(0.8); }
+        }
+        
+        .star-pop {
+            top: -5px;
+            right: -10px;
+        }
+        
+        .star-pop.show {
+            animation: starSpin 0.6s ease-out;
+        }
+        
+        @keyframes starSpin {
+            0% { opacity: 0; transform: rotate(0deg) scale(0); }
+            50% { opacity: 1; transform: rotate(180deg) scale(1.2); }
+            100% { opacity: 0; transform: rotate(360deg) scale(0); }
+        }
+        
+        .steam {
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .steam.show {
+            animation: steamRise 1s ease-out infinite;
+        }
+        
+        @keyframes steamRise {
+            0% { opacity: 0.8; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+        
+        /* 手持物品 */
+        .held-item {
+            position: absolute;
+            top: 35px;
+            right: -15px;
+            font-size: 16px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .held-item.show {
+            opacity: 1;
         }
         
         /* 对话气泡 */
         .pet-speech-bubble {
             position: absolute;
-            bottom: 100px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%) scale(0);
             background: white;
-            padding: 10px 15px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            white-space: nowrap;
+            padding: 12px 16px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             font-size: 13px;
             color: #333;
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 10000;
-            max-width: 200px;
+            max-width: 220px;
             text-align: center;
+            white-space: pre-wrap;
         }
         
         .pet-speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 10px solid white;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 12px solid white;
         }
         
         .pet-speech-bubble.show {
             transform: translateX(-50%) scale(1);
             opacity: 1;
+        }
+        
+        .speech-emoji {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 18px;
+            animation: emojiPop 0.3s ease-out;
+        }
+        
+        @keyframes emojiPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
         
         [data-theme="dark"] .pet-speech-bubble {
@@ -4339,17 +4801,17 @@ student2,学生2,student,student2@example.com"></textarea>
         /* 状态指示器 */
         .pet-status-indicator {
             position: absolute;
-            top: -5px;
-            right: 0px;
-            width: 18px;
-            height: 18px;
+            top: -8px;
+            right: -3px;
+            width: 20px;
+            height: 20px;
             background: #FF6B6B;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 9px;
+            font-size: 10px;
             animation: heartbeat 1.5s ease infinite;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -4361,88 +4823,123 @@ student2,学生2,student,student2@example.com"></textarea>
         
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.15); }
         }
+
+        /* ===== 动画状态 ===== */
         
-        /* ===== 小吐司动画状态 ===== */
-        
-        /* 空闲动画 - 轻微晃动 */
-        .desktop-pet.idle .toast-body {
+        /* 空闲动画 */
+        .desktop-pet.idle .pet-body {
             animation: toastIdle 3s ease-in-out infinite;
         }
         
         @keyframes toastIdle {
-            0%, 100% { transform: translateX(-50%) rotate(0deg); }
-            25% { transform: translateX(-50%) rotate(-2deg); }
-            75% { transform: translateX(-50%) rotate(2deg); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-2px) rotate(-1deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-2px) rotate(1deg); }
         }
         
-        /* 开心动画 - 跳跃 */
+        /* 开心动画 */
         .desktop-pet.happy .pet-body {
             animation: toastBounce 0.4s ease infinite;
         }
         
         .desktop-pet.happy .toast-mouth {
-            width: 12px;
-            height: 8px;
-            border-radius: 0 0 50% 50%;
+            width: 14px;
+            height: 10px;
+            border-radius: 2px 2px 50% 50%;
         }
         
         .desktop-pet.happy .toast-eye {
-            animation: toastBlink 0.3s ease;
+            transform: scaleY(0.8);
         }
         
         @keyframes toastBounce {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-8px) rotate(-3deg); }
-            75% { transform: translateY(-8px) rotate(3deg); }
-        }
-        
-        @keyframes toastBlink {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.1); }
+            25% { transform: translateY(-12px) rotate(-5deg); }
+            50% { transform: translateY(-8px) rotate(0deg); }
+            75% { transform: translateY(-12px) rotate(5deg); }
         }
         
         /* 惊讶动画 */
         .desktop-pet.surprised .toast-eye {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
         }
         
         .desktop-pet.surprised .toast-mouth {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #E57373;
         }
         
         .desktop-pet.surprised .pet-body {
-            animation: toastShake 0.3s ease;
+            animation: toastJump 0.4s ease;
         }
         
-        @keyframes toastShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            75% { transform: translateX(3px); }
+        @keyframes toastJump {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        
+        /* 担忧/难色状态 */
+        .desktop-pet.worried .toast-eye {
+            transform: scaleY(0.7);
+        }
+        
+        .desktop-pet.worried .toast-mouth {
+            width: 12px;
+            height: 6px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #E57373;
+        }
+        
+        .desktop-pet.worried .sweat-drop {
+            opacity: 1;
+            animation: sweatDrip 0.8s ease-out infinite;
+        }
+        
+        /* 倾斜状态 - 被快速拖动 */
+        .desktop-pet.tilted-left .pet-body {
+            transform: rotate(-20deg);
+        }
+        
+        .desktop-pet.tilted-right .pet-body {
+            transform: rotate(20deg);
+        }
+        
+        /* 压扁弹起 */
+        .desktop-pet.squash .pet-body {
+            animation: squashStretch 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes squashStretch {
+            0% { transform: scaleY(1) scaleX(1); }
+            30% { transform: scaleY(0.6) scaleX(1.3) translateY(10px); }
+            50% { transform: scaleY(1.2) scaleX(0.85); }
+            70% { transform: scaleY(0.9) scaleX(1.1); }
+            100% { transform: scaleY(1) scaleX(1); }
         }
         
         /* 睡眠状态 */
         .desktop-pet.sleeping .toast-eye {
-            height: 2px;
-            border-radius: 2px;
+            height: 3px;
+            border-radius: 3px;
         }
         
-        .desktop-pet.sleeping .toast-pupil {
+        .desktop-pet.sleeping .toast-pupil,
+        .desktop-pet.sleeping .toast-eye-shine {
             display: none;
         }
         
         .desktop-pet.sleeping .toast-mouth {
-            width: 10px;
-            height: 5px;
+            width: 8px;
+            height: 6px;
             border-radius: 50%;
             background: transparent;
-            border: 2px solid #E57373;
-            border-top: none;
         }
         
         .desktop-pet.sleeping .pet-body {
@@ -4452,61 +4949,147 @@ student2,学生2,student,student2@example.com"></textarea>
         .desktop-pet.sleeping::before {
             content: 'z Z z';
             position: absolute;
-            top: -15px;
-            right: -5px;
-            font-size: 12px;
+            top: -18px;
+            right: -8px;
+            font-size: 14px;
             color: #999;
             font-weight: bold;
-            animation: floatUp 2s ease-in-out infinite;
+            animation: floatZ 2s ease-in-out infinite;
         }
         
         @keyframes toastSleep {
-            0%, 100% { transform: rotate(-1deg); }
-            50% { transform: rotate(1deg); }
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
         }
         
-        @keyframes floatUp {
+        @keyframes floatZ {
             0%, 100% { opacity: 0.3; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-8px); }
+            50% { opacity: 1; transform: translateY(-10px); }
         }
         
-        /* 思考状态 */
-        .desktop-pet.thinking .toast-pupil {
-            animation: lookAround 2s ease-in-out infinite;
+        /* 走路动画 */
+        .desktop-pet.walking .toast-foot.left {
+            animation: footStep 0.3s ease infinite;
         }
         
-        .desktop-pet.thinking .toast-mouth {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
+        .desktop-pet.walking .toast-foot.right {
+            animation: footStep 0.3s ease 0.15s infinite;
         }
         
-        @keyframes lookAround {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-2px, 0); }
-            50% { transform: translate(0, -2px); }
-            75% { transform: translate(2px, 0); }
+        .desktop-pet.walking .pet-body {
+            animation: walkBob 0.3s ease infinite;
+        }
+        
+        @keyframes footStep {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        
+        @keyframes walkBob {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-3px) rotate(1deg); }
         }
         
         /* 挥手动画 */
         .desktop-pet.waving .toast-arm.right {
-            animation: wave 0.4s ease-in-out 4;
+            animation: waveHand 0.4s ease-in-out 4;
         }
         
-        @keyframes wave {
-            0%, 100% { transform: rotate(15deg); }
-            50% { transform: rotate(45deg) translateY(-3px); }
+        @keyframes waveHand {
+            0%, 100% { transform: rotate(20deg); }
+            50% { transform: rotate(60deg) translateY(-5px); }
         }
         
+        /* 泡澡状态 */
+        .desktop-pet.bathing {
+            z-index: 9996;
+        }
+        
+        .desktop-pet.bathing .pet-body {
+            animation: bathRelax 2s ease-in-out infinite;
+        }
+        
+        .desktop-pet.bathing .toast-eye {
+            transform: scaleY(0.5);
+        }
+        
+        .desktop-pet.bathing .toast-mouth {
+            width: 8px;
+            height: 4px;
+            border-radius: 0 0 50% 50%;
+        }
+        
+        @keyframes bathRelax {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-2px) rotate(1deg); }
+        }
+        
+        /* 烤制状态 */
+        .desktop-pet.toasting .steam {
+            opacity: 1;
+            animation: steamRise 0.8s ease-out infinite;
+        }
+        
+        .desktop-pet.toasting .toast-blush {
+            background: radial-gradient(ellipse, rgba(255, 80, 80, 0.9) 0%, transparent 70%);
+        }
+        
+        /* 躲边边状态 */
+        .desktop-pet.hiding-edge {
+            transition: right 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .desktop-pet.hiding-edge.right-edge {
+            right: -35px !important;
+        }
+        
+        .desktop-pet.hiding-edge.left-edge {
+            left: -35px !important;
+            right: auto !important;
+        }
+        
+        .desktop-pet.hiding-edge .toast-eye {
+            transform: scaleX(0.8);
+        }
+        
+        /* 拖拽状态 */
+        .desktop-pet.dragging {
+            cursor: grabbing !important;
+            transition: none !important;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+        }
+        
+        .desktop-pet.dragging .pet-body,
+        .desktop-pet.dragging .toast-body {
+            animation: none !important;
+        }
+        
+        .desktop-pet.dragging .toast-mouth {
+            width: 12px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .desktop-pet.dragging .pet-shadow {
+            width: 30px;
+            height: 6px;
+            opacity: 0.1;
+        }
+        
+        /* 忙碌状态 - 禁止交互 */
+        .desktop-pet.busy {
+            pointer-events: none;
+        }
+
         /* ===== 桌宠菜单 ===== */
         .pet-menu {
             position: fixed;
-            bottom: 130px;
+            bottom: 140px;
             right: 30px;
             width: 200px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            box-shadow: 0 12px 45px rgba(0,0,0,0.2);
             z-index: 9998;
             opacity: 0;
             visibility: hidden;
@@ -4522,8 +5105,8 @@ student2,学生2,student,student2@example.com"></textarea>
         }
         
         .pet-menu-header {
-            padding: 12px 15px;
-            background: linear-gradient(135deg, #D4A574, #C49A6C);
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #D4A574, #B8956A);
             color: white;
             font-weight: 600;
             font-size: 14px;
@@ -4536,47 +5119,50 @@ student2,学生2,student,student2@example.com"></textarea>
             background: none;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 22px;
             cursor: pointer;
             line-height: 1;
             opacity: 0.8;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
         }
         
         .pet-menu-close:hover {
             opacity: 1;
+            transform: rotate(90deg);
         }
         
         .pet-menu-content {
-            padding: 8px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
         }
         
         .pet-menu-item {
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 11px 14px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 13px;
             color: #333;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         
         .pet-menu-item:hover {
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(196, 154, 108, 0.15));
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.18), rgba(184, 149, 106, 0.18));
             color: #8B6914;
             transform: translateX(5px);
         }
         
         .pet-menu-item i {
             font-size: 16px;
-            width: 20px;
+            width: 22px;
             text-align: center;
         }
         
         .pet-menu-footer {
-            padding: 10px 15px;
+            padding: 12px 16px;
             background: #FFF8E7;
             border-top: 1px solid #F5E6D3;
         }
@@ -4586,6 +5172,7 @@ student2,学生2,student,student2@example.com"></textarea>
             justify-content: space-around;
             font-size: 12px;
             color: #8B6914;
+            font-weight: 500;
         }
         
         [data-theme="dark"] .pet-menu {
@@ -4597,7 +5184,7 @@ student2,学生2,student,student2@example.com"></textarea>
         }
         
         [data-theme="dark"] .pet-menu-item:hover {
-            background: rgba(212, 165, 116, 0.2);
+            background: rgba(212, 165, 116, 0.25);
             color: #D4A574;
         }
         
@@ -4609,46 +5196,29 @@ student2,学生2,student,student2@example.com"></textarea>
         [data-theme="dark"] .pet-stats {
             color: #D4A574;
         }
-        
-        /* ===== 拖拽时的样式 ===== */
-        .desktop-pet.dragging {
-            cursor: grabbing !important;
-            transition: none !important;
-        }
-        
-        .desktop-pet.dragging .pet-body,
-        .desktop-pet.dragging .toast-body {
-            animation: none !important;
-        }
-        
-        .desktop-pet.dragging .toast-eye {
-            animation: toastBlink 0.15s ease infinite;
-        }
-        
-        .desktop-pet.dragging .toast-mouth {
-            width: 10px;
-            height: 6px;
-            border-radius: 50%;
-        }
-        
+
         /* 响应式 */
         @media (max-width: 768px) {
             .desktop-pet {
-                width: 55px;
-                height: 70px;
+                width: 65px;
+                height: 80px;
                 bottom: 20px;
                 right: 20px;
             }
             
             .toast-body {
-                width: 48px;
-                height: 52px;
+                width: 52px;
+                height: 56px;
             }
             
             .pet-menu {
                 width: 180px;
-                bottom: 100px;
-                right: 20px;
+                bottom: 110px;
+                right: 15px;
+            }
+            
+            .pet-scene {
+                transform: scale(0.8);
             }
         }
     </style>
