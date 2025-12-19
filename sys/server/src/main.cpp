@@ -8,7 +8,7 @@
 
 HttpServer* g_server = nullptr;
 
-void signalHandler(int sig) {
+void signalHandler([[maybe_unused]] int sig) {
     std::cout << "\n正在关闭服务器..." << std::endl;
     if (g_server) {
         g_server->stop();
@@ -559,7 +559,7 @@ void handleGetAvailableClassrooms(const HttpRequest& req, HttpResponse& res) {
 }
 
 // ========== 教师/学生管理 ==========
-void handleGetTeachers(const HttpRequest& req, HttpResponse& res) {
+void handleGetTeachers([[maybe_unused]] const HttpRequest& req, HttpResponse& res) {
     auto& db = Database::getInstance();
     auto result = db.query("SELECT * FROM teacher ORDER BY teacher_code");
     res.setJson(Json::fromDbResult(result));
@@ -802,14 +802,14 @@ void handleGetScheduleSuggestion(const HttpRequest& req, HttpResponse& res) {
 }
 
 // ========== 节次时间配置 ==========
-void handleGetSectionTimes(const HttpRequest& req, HttpResponse& res) {
+void handleGetSectionTimes([[maybe_unused]] const HttpRequest& req, HttpResponse& res) {
     auto& db = Database::getInstance();
     auto result = db.query("SELECT * FROM section_time ORDER BY section_no");
     res.setJson(Json::fromDbResult(result));
 }
 
 // ========== 通知公告 ==========
-void handleGetNotices(const HttpRequest& req, HttpResponse& res) {
+void handleGetNotices([[maybe_unused]] const HttpRequest& req, HttpResponse& res) {
     auto& db = Database::getInstance();
     std::string sql = R"(
         SELECT n.*, u.real_name as author_name 

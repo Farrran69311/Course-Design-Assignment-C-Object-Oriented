@@ -211,15 +211,19 @@ HttpRequest HttpServer::parseRequest(const std::string& raw) {
 }
 
 std::string HttpServer::getMimeType(const std::string& path) {
-    if (path.ends_with(".html")) return "text/html";
-    if (path.ends_with(".css")) return "text/css";
-    if (path.ends_with(".js")) return "application/javascript";
-    if (path.ends_with(".json")) return "application/json";
-    if (path.ends_with(".png")) return "image/png";
-    if (path.ends_with(".jpg") || path.ends_with(".jpeg")) return "image/jpeg";
-    if (path.ends_with(".gif")) return "image/gif";
-    if (path.ends_with(".svg")) return "image/svg+xml";
-    if (path.ends_with(".ico")) return "image/x-icon";
+    auto endsWith = [](const std::string& str, const std::string& suffix) {
+        return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+    };
+    
+    if (endsWith(path, ".html")) return "text/html";
+    if (endsWith(path, ".css")) return "text/css";
+    if (endsWith(path, ".js")) return "application/javascript";
+    if (endsWith(path, ".json")) return "application/json";
+    if (endsWith(path, ".png")) return "image/png";
+    if (endsWith(path, ".jpg") || endsWith(path, ".jpeg")) return "image/jpeg";
+    if (endsWith(path, ".gif")) return "image/gif";
+    if (endsWith(path, ".svg")) return "image/svg+xml";
+    if (endsWith(path, ".ico")) return "image/x-icon";
     return "application/octet-stream";
 }
 

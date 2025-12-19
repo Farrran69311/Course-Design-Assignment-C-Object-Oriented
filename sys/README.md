@@ -5,6 +5,7 @@
 ## 系统功能
 
 ### 核心功能
+
 - **教室管理**: 教室信息的增删改查，支持按楼栋、类型、座位数筛选
 - **课程管理**: 课程信息管理，关联教师信息
 - **排课管理**: 智能排课，自动检测时间冲突（教室冲突、教师冲突）
@@ -13,6 +14,7 @@
 - **统计分析**: 教室利用率统计分析
 
 ### 系统特点
+
 - 🎨 现代化 UI 设计，包含过渡动画
 - 👥 支持管理员/教师端和学生端
 - 📊 数据可视化统计
@@ -27,7 +29,7 @@
 
 ## 目录结构
 
-```
+```bash
 sys/
 ├── database/
 │   └── init.sql          # 数据库初始化脚本
@@ -93,14 +95,16 @@ make
 ./classroom_server
 ```
 
-服务器启动后访问: http://localhost:8080
+服务器启动后访问: <http://localhost:8080>
 
 ## API 接口
 
 ### 认证
+
 - `POST /api/login` - 用户登录
 
 ### 教室管理
+
 - `GET /api/classrooms` - 获取教室列表
 - `GET /api/classrooms/:id` - 获取教室详情
 - `POST /api/classrooms` - 新增教室
@@ -108,6 +112,7 @@ make
 - `DELETE /api/classrooms/:id` - 删除教室
 
 ### 课程管理
+
 - `GET /api/courses` - 获取课程列表
 - `GET /api/courses/:id` - 获取课程详情
 - `POST /api/courses` - 新增课程
@@ -115,17 +120,21 @@ make
 - `DELETE /api/courses/:id` - 删除课程
 
 ### 排课管理
+
 - `GET /api/schedules` - 获取排课列表
 - `POST /api/schedules` - 新增排课（自动检测冲突）
 - `DELETE /api/schedules/:id` - 删除排课
 
 ### 课表查询
+
 - `GET /api/teachers/:id/timetable` - 获取教师课表
 
 ### 空闲教室
+
 - `GET /api/available-classrooms` - 查询空闲教室
 
 ### 统计
+
 - `GET /api/statistics/utilization` - 教室利用率统计
 
 ## 默认账户
@@ -139,11 +148,13 @@ make
 ## 使用说明
 
 ### 教师/管理员端
+
 1. 使用管理员或教师账号登录
 2. 可以进行教室、课程、排课的管理
 3. 查看课表和统计数据
 
 ### 学生端
+
 1. 使用学生账号登录
 2. 可以查询课表
 3. 查询空闲教室
@@ -169,6 +180,7 @@ server.start(8080);
 ## 截图
 
 系统包含以下主要页面：
+
 - 登录页面（带渐变背景和动画效果）
 - 仪表盘（统计概览 + 图表）
 - 教室管理（表格 + 筛选 + CRUD）
