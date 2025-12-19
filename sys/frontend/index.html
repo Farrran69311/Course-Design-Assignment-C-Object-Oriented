@@ -3913,8 +3913,749 @@ student2,学生2,student,student2@example.com"></textarea>
         </div>
     </div>
 
+    <!-- ===== 桌宠容器 - 小吐司 ===== -->
+    <div id="desktop-pet" class="desktop-pet" title="点击我互动~">
+        <div class="pet-body">
+            <!-- 吐司本体 -->
+            <div class="toast-body">
+                <!-- 焦边 -->
+                <div class="toast-crust"></div>
+                <!-- 吐司面包芯 -->
+                <div class="toast-inner">
+                    <!-- 表情 -->
+                    <div class="toast-face">
+                        <div class="toast-eyes">
+                            <div class="toast-eye left">
+                                <div class="toast-pupil"></div>
+                            </div>
+                            <div class="toast-eye right">
+                                <div class="toast-pupil"></div>
+                            </div>
+                        </div>
+                        <div class="toast-mouth"></div>
+                        <div class="toast-blush left"></div>
+                        <div class="toast-blush right"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 小手 -->
+            <div class="toast-arms">
+                <div class="toast-arm left"></div>
+                <div class="toast-arm right"></div>
+            </div>
+            <!-- 小脚 -->
+            <div class="toast-feet">
+                <div class="toast-foot left"></div>
+                <div class="toast-foot right"></div>
+            </div>
+        </div>
+        <!-- 影子 -->
+        <div class="pet-shadow"></div>
+        <!-- 对话气泡 -->
+        <div class="pet-speech-bubble" id="petSpeechBubble">
+            <span id="petSpeechText">你好呀！</span>
+        </div>
+        <!-- 状态指示器 -->
+        <div class="pet-status-indicator" id="petStatusIndicator">
+            <i class="bi bi-heart-fill"></i>
+        </div>
+        <!-- 装饰 - 黄油/果酱 -->
+        <div class="toast-topping" id="toastTopping"></div>
+    </div>
+
+    <!-- 桌宠菜单 -->
+    <div id="pet-menu" class="pet-menu">
+        <div class="pet-menu-header">
+            <span>🍞 小吐司菜单</span>
+            <button class="pet-menu-close" onclick="closePetMenu()">&times;</button>
+        </div>
+        <div class="pet-menu-content">
+            <div class="pet-menu-item" onclick="petAction('greet')">
+                <i class="bi bi-chat-heart"></i> 打招呼
+            </div>
+            <div class="pet-menu-item" onclick="petAction('summary')">
+                <i class="bi bi-clipboard-data"></i> 今日概览
+            </div>
+            <div class="pet-menu-item" onclick="petAction('remind')">
+                <i class="bi bi-bell"></i> 查看提醒
+            </div>
+            <div class="pet-menu-item" onclick="petAction('weather')">
+                <i class="bi bi-cloud-sun"></i> 天气心情
+            </div>
+            <div class="pet-menu-item" onclick="petAction('encourage')">
+                <i class="bi bi-emoji-smile"></i> 鼓励一下
+            </div>
+            <div class="pet-menu-item" onclick="petAction('topping')">
+                <i class="bi bi-palette"></i> 换个配料
+            </div>
+            <div class="pet-menu-item" onclick="petAction('sleep')">
+                <i class="bi bi-moon-stars"></i> 休息模式
+            </div>
+            <div class="pet-menu-item" onclick="petAction('settings')">
+                <i class="bi bi-gear"></i> 设置
+            </div>
+        </div>
+        <div class="pet-menu-footer">
+            <div class="pet-stats">
+                <span>❤️ <span id="petHappiness">100</span></span>
+                <span>⚡ <span id="petEnergy">100</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 桌宠设置模态框 -->
+    <div class="modal fade" id="petSettingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-gear me-2"></i>小吐司设置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">吐司名字</label>
+                        <input type="text" class="form-control" id="petNameInput" value="小吐司" maxlength="10">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">显示位置</label>
+                        <select class="form-select" id="petPositionSelect">
+                            <option value="bottom-right">右下角</option>
+                            <option value="bottom-left">左下角</option>
+                            <option value="top-right">右上角</option>
+                            <option value="top-left">左上角</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">互动频率</label>
+                        <select class="form-select" id="petInteractionFreq">
+                            <option value="high">高（经常说话）</option>
+                            <option value="medium" selected>中等</option>
+                            <option value="low">低（安静模式）</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="petSoundEnabled">
+                        <label class="form-check-label" for="petSoundEnabled">启用音效</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="petNotifyEnabled" checked>
+                        <label class="form-check-label" for="petNotifyEnabled">系统通知提醒</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="petAutoSleep" checked>
+                        <label class="form-check-label" for="petAutoSleep">自动休眠（无操作5分钟）</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="savePetSettings()">保存设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ===== 小吐司桌宠样式 ===== */
+        .desktop-pet {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 90px;
+            cursor: grab;
+            z-index: 9999;
+            user-select: none;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+        
+        .desktop-pet:active {
+            cursor: grabbing;
+        }
+        
+        .desktop-pet:hover {
+            transform: scale(1.08);
+        }
+        
+        .pet-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 吐司本体 */
+        .toast-body {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 65px;
+            border-radius: 8px 8px 5px 5px;
+            overflow: hidden;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.1);
+        }
+        
+        /* 吐司焦边 */
+        .toast-crust {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                #D4A574 0%, 
+                #C49A6C 15%,
+                #E8D4B8 20%,
+                #F5E6D3 100%
+            );
+            border-radius: 8px 8px 5px 5px;
+            border: 3px solid #C49A6C;
+            border-bottom-width: 4px;
+        }
+        
+        /* 吐司内芯 */
+        .toast-inner {
+            position: absolute;
+            top: 12px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            background: linear-gradient(180deg, #FFF8E7 0%, #F5E6D3 100%);
+            border-radius: 3px;
+        }
+        
+        /* 表情区域 */
+        .toast-face {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 眼睛 */
+        .toast-eyes {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .toast-eye {
+            width: 10px;
+            height: 10px;
+            background: #2D2D2D;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .toast-pupil {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            transition: all 0.1s ease;
+        }
+        
+        /* 嘴巴 */
+        .toast-mouth {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 4px;
+            background: #E57373;
+            border-radius: 0 0 10px 10px;
+            transition: all 0.3s ease;
+        }
+        
+        /* 腮红 */
+        .toast-blush {
+            position: absolute;
+            bottom: 12px;
+            width: 8px;
+            height: 5px;
+            background: rgba(255, 150, 150, 0.6);
+            border-radius: 50%;
+        }
+        
+        .toast-blush.left { left: 2px; }
+        .toast-blush.right { right: 2px; }
+        
+        /* 小手 */
+        .toast-arms {
+            position: absolute;
+            top: 40px;
+            width: 100%;
+        }
+        
+        .toast-arm {
+            position: absolute;
+            width: 10px;
+            height: 15px;
+            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
+            border: 2px solid #C49A6C;
+            border-radius: 5px;
+        }
+        
+        .toast-arm.left {
+            left: 0;
+            transform: rotate(-15deg);
+            transform-origin: top right;
+        }
+        
+        .toast-arm.right {
+            right: 0;
+            transform: rotate(15deg);
+            transform-origin: top left;
+        }
+        
+        /* 小脚 */
+        .toast-feet {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .toast-foot {
+            width: 14px;
+            height: 8px;
+            background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
+            border: 2px solid #C49A6C;
+            border-radius: 3px 3px 5px 5px;
+        }
+        
+        /* 配料 */
+        .toast-topping {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 8px;
+            border-radius: 2px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast-topping.butter {
+            background: linear-gradient(180deg, #FFE566 0%, #FFD700 100%);
+            box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+            opacity: 1;
+        }
+        
+        .toast-topping.jam {
+            background: linear-gradient(180deg, #FF6B6B 0%, #C0392B 100%);
+            box-shadow: 0 2px 4px rgba(192, 57, 43, 0.4);
+            opacity: 1;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            top: 5px;
+        }
+        
+        .toast-topping.honey {
+            background: linear-gradient(180deg, #F4A460 0%, #D2691E 100%);
+            box-shadow: 0 2px 4px rgba(210, 105, 30, 0.4);
+            opacity: 1;
+            width: 25px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .toast-topping.chocolate {
+            background: linear-gradient(180deg, #8B4513 0%, #5D3A1A 100%);
+            box-shadow: 0 2px 4px rgba(93, 58, 26, 0.4);
+            opacity: 1;
+            width: 28px;
+        }
+        
+        /* 影子 */
+        .pet-shadow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+        
+        /* 对话气泡 */
+        .pet-speech-bubble {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            white-space: nowrap;
+            font-size: 13px;
+            color: #333;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 10000;
+            max-width: 200px;
+            text-align: center;
+        }
+        
+        .pet-speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid white;
+        }
+        
+        .pet-speech-bubble.show {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+        }
+        
+        [data-theme="dark"] .pet-speech-bubble {
+            background: #2d3654;
+            color: #e0e0e0;
+        }
+        
+        [data-theme="dark"] .pet-speech-bubble::after {
+            border-top-color: #2d3654;
+        }
+        
+        /* 状态指示器 */
+        .pet-status-indicator {
+            position: absolute;
+            top: -5px;
+            right: 0px;
+            width: 18px;
+            height: 18px;
+            background: #FF6B6B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            animation: heartbeat 1.5s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pet-status-indicator.show {
+            opacity: 1;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* ===== 小吐司动画状态 ===== */
+        
+        /* 空闲动画 - 轻微晃动 */
+        .desktop-pet.idle .toast-body {
+            animation: toastIdle 3s ease-in-out infinite;
+        }
+        
+        @keyframes toastIdle {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            25% { transform: translateX(-50%) rotate(-2deg); }
+            75% { transform: translateX(-50%) rotate(2deg); }
+        }
+        
+        /* 开心动画 - 跳跃 */
+        .desktop-pet.happy .pet-body {
+            animation: toastBounce 0.4s ease infinite;
+        }
+        
+        .desktop-pet.happy .toast-mouth {
+            width: 12px;
+            height: 8px;
+            border-radius: 0 0 50% 50%;
+        }
+        
+        .desktop-pet.happy .toast-eye {
+            animation: toastBlink 0.3s ease;
+        }
+        
+        @keyframes toastBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(-3deg); }
+            75% { transform: translateY(-8px) rotate(3deg); }
+        }
+        
+        @keyframes toastBlink {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+        
+        /* 惊讶动画 */
+        .desktop-pet.surprised .toast-eye {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .desktop-pet.surprised .toast-mouth {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E57373;
+        }
+        
+        .desktop-pet.surprised .pet-body {
+            animation: toastShake 0.3s ease;
+        }
+        
+        @keyframes toastShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        /* 睡眠状态 */
+        .desktop-pet.sleeping .toast-eye {
+            height: 2px;
+            border-radius: 2px;
+        }
+        
+        .desktop-pet.sleeping .toast-pupil {
+            display: none;
+        }
+        
+        .desktop-pet.sleeping .toast-mouth {
+            width: 10px;
+            height: 5px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #E57373;
+            border-top: none;
+        }
+        
+        .desktop-pet.sleeping .pet-body {
+            animation: toastSleep 2s ease-in-out infinite;
+        }
+        
+        .desktop-pet.sleeping::before {
+            content: 'z Z z';
+            position: absolute;
+            top: -15px;
+            right: -5px;
+            font-size: 12px;
+            color: #999;
+            font-weight: bold;
+            animation: floatUp 2s ease-in-out infinite;
+        }
+        
+        @keyframes toastSleep {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+        
+        @keyframes floatUp {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-8px); }
+        }
+        
+        /* 思考状态 */
+        .desktop-pet.thinking .toast-pupil {
+            animation: lookAround 2s ease-in-out infinite;
+        }
+        
+        .desktop-pet.thinking .toast-mouth {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+        
+        @keyframes lookAround {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-2px, 0); }
+            50% { transform: translate(0, -2px); }
+            75% { transform: translate(2px, 0); }
+        }
+        
+        /* 挥手动画 */
+        .desktop-pet.waving .toast-arm.right {
+            animation: wave 0.4s ease-in-out 4;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: rotate(15deg); }
+            50% { transform: rotate(45deg) translateY(-3px); }
+        }
+        
+        /* ===== 桌宠菜单 ===== */
+        .pet-menu {
+            position: fixed;
+            bottom: 130px;
+            right: 30px;
+            width: 200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.9);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+        }
+        
+        .pet-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        
+        .pet-menu-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #D4A574, #C49A6C);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pet-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .pet-menu-close:hover {
+            opacity: 1;
+        }
+        
+        .pet-menu-content {
+            padding: 8px;
+        }
+        
+        .pet-menu-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pet-menu-item:hover {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(196, 154, 108, 0.15));
+            color: #8B6914;
+            transform: translateX(5px);
+        }
+        
+        .pet-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .pet-menu-footer {
+            padding: 10px 15px;
+            background: #FFF8E7;
+            border-top: 1px solid #F5E6D3;
+        }
+        
+        .pet-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 12px;
+            color: #8B6914;
+        }
+        
+        [data-theme="dark"] .pet-menu {
+            background: #1e2746;
+        }
+        
+        [data-theme="dark"] .pet-menu-item {
+            color: #e0e0e0;
+        }
+        
+        [data-theme="dark"] .pet-menu-item:hover {
+            background: rgba(212, 165, 116, 0.2);
+            color: #D4A574;
+        }
+        
+        [data-theme="dark"] .pet-menu-footer {
+            background: #252d44;
+            border-color: #3a3f5c;
+        }
+        
+        [data-theme="dark"] .pet-stats {
+            color: #D4A574;
+        }
+        
+        /* ===== 拖拽时的样式 ===== */
+        .desktop-pet.dragging {
+            cursor: grabbing !important;
+            transition: none !important;
+        }
+        
+        .desktop-pet.dragging .pet-body,
+        .desktop-pet.dragging .toast-body {
+            animation: none !important;
+        }
+        
+        .desktop-pet.dragging .toast-eye {
+            animation: toastBlink 0.15s ease infinite;
+        }
+        
+        .desktop-pet.dragging .toast-mouth {
+            width: 10px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .desktop-pet {
+                width: 55px;
+                height: 70px;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .toast-body {
+                width: 48px;
+                height: 52px;
+            }
+            
+            .pet-menu {
+                width: 180px;
+                bottom: 100px;
+                right: 20px;
+            }
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
+    <script src="pet.js"></script>
 </body>
 </html>

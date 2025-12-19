@@ -58,25 +58,45 @@ document.addEventListener('DOMContentLoaded', updateCurrentTime);
 function showLoading(message = '加载中...') {
     loadingCount++;
     let overlay = document.getElementById('loadingOverlay');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'loadingOverlay';
         overlay.innerHTML = `
-            <div class="loading-content">
-                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-                <p class="loading-text mt-3 mb-0">${message}</p>
+            <div class="loading-content" style="text-align: center;">
+                <div class="loading-spinner" style="
+                    width: 60px; height: 60px; 
+                    border: 4px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(92,107,192,0.1)'};
+                    border-top-color: #5c6bc0;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 20px;
+                "></div>
+                <p class="loading-text" style="
+                    font-size: 16px; font-weight: 500;
+                    color: ${isDark ? '#e0e0e0' : '#333'};
+                    margin: 0;
+                ">${message}</p>
+                <div class="loading-dots" style="margin-top: 8px;">
+                    <span style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s;">●</span>
+                    <span style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s;">●</span>
+                    <span style="animation: bounce 1.4s infinite ease-in-out both;">●</span>
+                </div>
             </div>
         `;
         overlay.style.cssText = `
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9); z-index: 10000;
+            background: ${isDark ? 'rgba(26, 26, 46, 0.95)' : 'rgba(255,255,255,0.95)'}; 
+            z-index: 10000;
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
         `;
         document.body.appendChild(overlay);
     } else {
         overlay.querySelector('.loading-text').textContent = message;
         overlay.style.display = 'flex';
+        overlay.style.background = isDark ? 'rgba(26, 26, 46, 0.95)' : 'rgba(255,255,255,0.95)';
     }
 }
 
