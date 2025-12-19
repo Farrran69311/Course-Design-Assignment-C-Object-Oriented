@@ -1,806 +1,707 @@
 /**
- * 桌宠系统 - Desktop Pet System
- * 一个可爱的桌宠助手，支持拖拽、互动、系统集成
+ * 桌宠系统 - 小吐司 Toast Pet
+ * 可爱的卡通吐司桌宠，支持鼠标互动、平台集成和多种状态
  */
 
 class DesktopPet {
     constructor() {
-        this.element = document.getElementById('desktop-pet');
+        this.pet = document.getElementById('desktop-pet');
         this.speechBubble = document.getElementById('petSpeechBubble');
         this.speechText = document.getElementById('petSpeechText');
-        this.menu = document.getElementById('pet-menu');
         this.statusIndicator = document.getElementById('petStatusIndicator');
+        this.menu = document.getElementById('pet-menu');
+        this.topping = document.getElementById('toastTopping');
         
         // 状态
-        this.state = {
-            name: '小助手',
-            happiness: 100,
-            energy: 100,
-            mood: 'idle',  // idle, happy, surprised, sleeping, thinking, waving
-            isSleeping: false,
-            isDragging: false,
-            lastInteraction: Date.now(),
-            position: { x: null, y: null },
-            settings: {
-                position: 'bottom-right',
-                interactionFreq: 'medium',
-                soundEnabled: false,
-                notifyEnabled: true,
-                autoSleep: true
-            }
-        };
+        this.state = 'idle'; // idle, happy, surprised, sleeping, thinking, waving
+        this.happiness = 100;
+        this.energy = 100;
+        this.currentTopping = 'none'; // none, butter, jam, honey, chocolate
         
-        // 拖拽相关
+        // 拖拽状态
+        this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
         
-        // 定时器
-        this.timers = {
-            autoTalk: null,
-            sleep: null,
-            statusUpdate: null,
-            eyeFollow: null
-        };
+        // 设置
+        this.settings = this.loadSettings();
         
-        // 话语库
+        // 对话库 - 吐司主题
         this.dialogues = {
             greet: [
-                '你好呀！今天也要加油哦~',
-                '嗨！见到你真开心 ヾ(≧▽≦*)o',
-                '欢迎回来！我等你好久啦~',
-                '哇，你来啦！(◕ᴗ◕✿)',
-                '今天天气真不错呢~'
+                '你好呀！我是小吐司～🍞',
+                '今天也要元气满满哦！',
+                '嘿！需要我帮忙吗？',
+                '见到你真开心！✨',
+                '早上好！来片吐司吗？',
+                '嗨嗨！我刚烤好的～'
             ],
             idle: [
-                '有什么我可以帮你的吗？',
-                '点击我可以和我互动哦~',
-                '无聊的话可以找我聊天~',
-                '我在这里陪着你呢 ♪(´▽｀)',
-                '嗯...今天要做什么呢？'
-            ],
-            click: [
-                '嘿嘿，被你发现啦~',
-                '别戳我啦，痒痒的 (>﹏<)',
-                '想和我说什么呀？',
-                '呀！你点到我了~',
-                '哈哈，我在呢！'
-            ],
-            drag: [
-                '呀！你要带我去哪里~',
-                '稳住稳住，不要掉下去！',
-                '嘻嘻，飞起来啦~',
-                '哇，好高好高！',
-                '我可以看到新风景啦~'
+                '今天的课程安排好了吗？',
+                '要不要看看今日概览？',
+                '别忘了查看预约情况哦～',
+                '有什么需要帮忙的吗？',
+                '我闻起来香不香？🍞',
+                '好想被涂上黄油啊...',
+                '吐司的日常，烤得刚刚好～'
             ],
             encourage: [
-                '你是最棒的！加油！💪',
-                '相信自己，你可以的！',
-                '每一步都是进步，继续加油~',
-                '困难只是暂时的，你一定能克服！',
-                '我永远支持你！(ง •̀_•́)ง',
-                '今天的努力是明天的收获~',
-                '休息一下也很重要哦~'
-            ],
-            summary: [
-                '让我看看今天的情况...',
-                '正在为您整理数据~',
-                '今天系统运行正常！',
-                '数据已经准备好啦~'
-            ],
-            sleep: [
-                '好困呀...让我休息一下吧...',
-                'zzZ...zzZ...',
-                '晚安...做个好梦...',
-                '我先睡一会儿...有事叫我哦...'
-            ],
-            wakeup: [
-                '嗯...醒了醒了！',
-                '哈~睡得真香~',
-                '我回来啦！精神满满~',
-                '呀，睡过头了吗？'
-            ],
-            notice: [
-                '📢 有新通知哦！',
-                '叮咚~ 来消息啦！',
-                '主人，有新消息！',
-                '注意！有事情要处理~'
+                '你做得很棒！继续加油！💪',
+                '相信自己，你是最棒的！',
+                '每一步努力都有意义！',
+                '今天也是美好的一天！',
+                '像吐司一样温暖你～🍞',
+                '金黄酥脆，活力满满！'
             ],
             weather: [
-                '今天心情晴朗~☀️',
-                '感觉今天会很顺利呢~',
-                '有点想吃好吃的...',
-                '今天适合努力工作！'
+                '今天天气真不错呢～☀️',
+                '适合出去走走的天气！',
+                '窗外的风景一定很美！',
+                '希望天气像我一样金黄！'
+            ],
+            sleepy: [
+                '呼呼...让我休息一下...',
+                'Zzz...梦到黄油了...',
+                '好困...吐司也需要休息...',
+                '晚安...明天见...🌙'
+            ],
+            wakeup: [
+                '啊！我醒啦！刚烤好！',
+                '嗯？有人叫我吗？',
+                '我在我在！香喷喷的！',
+                '吐司报到！✨'
+            ],
+            drag: [
+                '哇！被拿起来了！',
+                '轻点轻点～别掉渣！',
+                '好高好高！',
+                '我可以飞了吗？🍞'
+            ],
+            click: [
+                '戳到我啦！痒痒的～',
+                '嘻嘻，你好呀！',
+                '有什么事吗？',
+                '被点到了！酥脆！'
+            ],
+            topping: [
+                '哇！涂上{topping}了！好香！',
+                '谢谢你给我涂{topping}～',
+                '{topping}最配吐司了！',
+                '现在我更好吃了！🍞'
             ]
         };
         
+        // 配料名称映射
+        this.toppingNames = {
+            butter: '黄油',
+            jam: '果酱',
+            honey: '蜂蜜',
+            chocolate: '巧克力'
+        };
+        
+        // 定时器
+        this.idleTimer = null;
+        this.sleepTimer = null;
+        this.speechTimer = null;
+        
+        // 初始化
         this.init();
     }
     
     init() {
-        this.loadSettings();
-        this.bindEvents();
-        this.startTimers();
-        this.setInitialPosition();
+        // 检查是否登录
+        if (!this.isLoggedIn()) {
+            this.hide();
+            return;
+        }
         
-        // 初始化后打招呼
+        this.show();
+        this.applySettings();
+        this.bindEvents();
+        this.startIdleTimer();
+        
+        // 延迟打招呼
         setTimeout(() => {
             this.say(this.getRandomDialogue('greet'));
-            this.setMood('waving');
-            setTimeout(() => this.setMood('idle'), 2000);
-        }, 1000);
+            this.setState('waving');
+            setTimeout(() => this.setState('idle'), 2000);
+        }, 1500);
         
-        console.log('🐱 桌宠系统已启动！');
-    }
-    
-    // ========== 设置管理 ==========
-    
-    loadSettings() {
-        const saved = localStorage.getItem('petSettings');
-        if (saved) {
-            try {
-                const settings = JSON.parse(saved);
-                this.state = { ...this.state, ...settings };
-            } catch (e) {
-                console.error('加载桌宠设置失败:', e);
-            }
+        // 恢复配料状态
+        const savedTopping = localStorage.getItem('petTopping');
+        if (savedTopping && savedTopping !== 'none') {
+            this.setTopping(savedTopping, false);
         }
-        this.updateStatsDisplay();
     }
     
-    saveSettings() {
-        const toSave = {
-            name: this.state.name,
-            happiness: this.state.happiness,
-            energy: this.state.energy,
-            position: this.state.position,
-            settings: this.state.settings
-        };
-        localStorage.setItem('petSettings', JSON.stringify(toSave));
+    isLoggedIn() {
+        const mainContainer = document.getElementById('mainContainer');
+        return mainContainer && mainContainer.style.display !== 'none';
     }
     
-    // ========== 事件绑定 ==========
+    show() {
+        if (this.pet) {
+            this.pet.style.display = 'block';
+        }
+    }
     
+    hide() {
+        if (this.pet) {
+            this.pet.style.display = 'none';
+        }
+    }
+    
+    // 事件绑定
     bindEvents() {
-        // 鼠标事件
-        this.element.addEventListener('mousedown', (e) => this.onDragStart(e));
+        // 拖拽事件
+        this.pet.addEventListener('mousedown', (e) => this.onDragStart(e));
         document.addEventListener('mousemove', (e) => this.onDragMove(e));
-        document.addEventListener('mouseup', (e) => this.onDragEnd(e));
+        document.addEventListener('mouseup', () => this.onDragEnd());
         
-        // 触摸事件（移动端）
-        this.element.addEventListener('touchstart', (e) => this.onDragStart(e));
-        document.addEventListener('touchmove', (e) => this.onDragMove(e));
-        document.addEventListener('touchend', (e) => this.onDragEnd(e));
+        // 触摸事件
+        this.pet.addEventListener('touchstart', (e) => this.onTouchStart(e));
+        document.addEventListener('touchmove', (e) => this.onTouchMove(e));
+        document.addEventListener('touchend', () => this.onDragEnd());
         
         // 点击事件
-        this.element.addEventListener('click', (e) => this.onClick(e));
+        this.pet.addEventListener('click', (e) => this.onClick(e));
         
         // 右键菜单
-        this.element.addEventListener('contextmenu', (e) => {
+        this.pet.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             this.toggleMenu();
         });
         
-        // 双击事件
-        this.element.addEventListener('dblclick', () => {
-            this.toggleMenu();
-        });
+        // 眼睛跟随鼠标
+        document.addEventListener('mousemove', (e) => this.eyeFollow(e));
         
-        // 鼠标移动 - 眼睛跟随
-        document.addEventListener('mousemove', (e) => this.followEyes(e));
+        // 监听系统通知
+        this.observeNotifications();
         
-        // 点击其他区域关闭菜单
+        // 监听登录状态变化
+        this.observeLoginState();
+        
+        // 点击其他地方关闭菜单
         document.addEventListener('click', (e) => {
-            if (!this.element.contains(e.target) && !this.menu.contains(e.target)) {
+            if (!this.menu.contains(e.target) && !this.pet.contains(e.target)) {
                 this.closeMenu();
             }
         });
-        
-        // 监听系统通知
-        this.listenForNotifications();
     }
     
-    // ========== 拖拽功能 ==========
+    // 眼睛跟随鼠标
+    eyeFollow(e) {
+        if (this.state === 'sleeping' || this.isDragging) return;
+        
+        const pupils = this.pet.querySelectorAll('.toast-pupil');
+        const petRect = this.pet.getBoundingClientRect();
+        const petCenterX = petRect.left + petRect.width / 2;
+        const petCenterY = petRect.top + petRect.height / 3;
+        
+        const angle = Math.atan2(e.clientY - petCenterY, e.clientX - petCenterX);
+        const distance = Math.min(2, Math.hypot(e.clientX - petCenterX, e.clientY - petCenterY) / 100);
+        
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        
+        pupils.forEach(pupil => {
+            pupil.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    }
     
+    // 拖拽开始
     onDragStart(e) {
         if (e.button === 2) return; // 右键不拖拽
         
-        const clientX = e.clientX || e.touches?.[0]?.clientX;
-        const clientY = e.clientY || e.touches?.[0]?.clientY;
+        this.isDragging = true;
+        this.pet.classList.add('dragging');
         
-        const rect = this.element.getBoundingClientRect();
-        this.dragOffset.x = clientX - rect.left;
-        this.dragOffset.y = clientY - rect.top;
+        const rect = this.pet.getBoundingClientRect();
+        this.dragOffset = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
         
-        this.state.isDragging = true;
-        this.element.classList.add('dragging');
-        
-        // 关闭菜单
-        this.closeMenu();
+        this.say(this.getRandomDialogue('drag'));
     }
     
+    // 触摸开始
+    onTouchStart(e) {
+        const touch = e.touches[0];
+        this.isDragging = true;
+        this.pet.classList.add('dragging');
+        
+        const rect = this.pet.getBoundingClientRect();
+        this.dragOffset = {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
+        };
+    }
+    
+    // 拖拽移动
     onDragMove(e) {
-        if (!this.state.isDragging) return;
+        if (!this.isDragging) return;
         
-        e.preventDefault();
+        const x = e.clientX - this.dragOffset.x;
+        const y = e.clientY - this.dragOffset.y;
         
-        const clientX = e.clientX || e.touches?.[0]?.clientX;
-        const clientY = e.clientY || e.touches?.[0]?.clientY;
+        // 边界检测
+        const maxX = window.innerWidth - this.pet.offsetWidth;
+        const maxY = window.innerHeight - this.pet.offsetHeight;
         
-        let newX = clientX - this.dragOffset.x;
-        let newY = clientY - this.dragOffset.y;
-        
-        // 边界限制
-        const maxX = window.innerWidth - this.element.offsetWidth;
-        const maxY = window.innerHeight - this.element.offsetHeight;
-        
-        newX = Math.max(0, Math.min(newX, maxX));
-        newY = Math.max(0, Math.min(newY, maxY));
-        
-        this.element.style.left = newX + 'px';
-        this.element.style.top = newY + 'px';
-        this.element.style.right = 'auto';
-        this.element.style.bottom = 'auto';
-        
-        this.state.position = { x: newX, y: newY };
+        this.pet.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
+        this.pet.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
+        this.pet.style.right = 'auto';
+        this.pet.style.bottom = 'auto';
     }
     
-    onDragEnd(e) {
-        if (!this.state.isDragging) return;
+    // 触摸移动
+    onTouchMove(e) {
+        if (!this.isDragging) return;
         
-        this.state.isDragging = false;
-        this.element.classList.remove('dragging');
+        const touch = e.touches[0];
+        const x = touch.clientX - this.dragOffset.x;
+        const y = touch.clientY - this.dragOffset.y;
         
-        // 拖拽结束说话
-        if (Math.random() > 0.5) {
-            this.say(this.getRandomDialogue('drag'));
-        }
+        const maxX = window.innerWidth - this.pet.offsetWidth;
+        const maxY = window.innerHeight - this.pet.offsetHeight;
         
-        this.saveSettings();
-        this.recordInteraction();
+        this.pet.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
+        this.pet.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
+        this.pet.style.right = 'auto';
+        this.pet.style.bottom = 'auto';
     }
     
-    // ========== 点击互动 ==========
+    // 拖拽结束
+    onDragEnd() {
+        if (!this.isDragging) return;
+        
+        this.isDragging = false;
+        this.pet.classList.remove('dragging');
+        this.resetIdleTimer();
+    }
     
+    // 点击事件
     onClick(e) {
-        // 忽略拖拽触发的点击
-        if (this.state.isDragging) return;
+        if (this.isDragging) return;
         
-        this.recordInteraction();
-        
-        // 如果在睡觉，先唤醒
-        if (this.state.isSleeping) {
+        // 如果在睡觉，点击唤醒
+        if (this.state === 'sleeping') {
             this.wakeUp();
             return;
         }
         
-        // 随机互动
+        // 普通点击
         this.say(this.getRandomDialogue('click'));
-        this.setMood('happy');
-        this.addHappiness(5);
+        this.setState('happy');
+        setTimeout(() => this.setState('idle'), 1500);
         
-        // 一段时间后恢复
-        setTimeout(() => {
-            if (!this.state.isSleeping) {
-                this.setMood('idle');
-            }
-        }, 2000);
+        // 增加好感度
+        this.addHappiness(2);
+        this.resetIdleTimer();
     }
     
-    // ========== 眼睛跟随鼠标 ==========
-    
-    followEyes(e) {
-        if (this.state.isSleeping || this.state.isDragging) return;
-        
-        const eyes = this.element.querySelectorAll('.pet-pupil');
-        const rect = this.element.getBoundingClientRect();
-        const petCenterX = rect.left + rect.width / 2;
-        const petCenterY = rect.top + rect.height / 3;
-        
-        const angle = Math.atan2(e.clientY - petCenterY, e.clientX - petCenterX);
-        const distance = Math.min(3, Math.hypot(e.clientX - petCenterX, e.clientY - petCenterY) / 50);
-        
-        const offsetX = Math.cos(angle) * distance;
-        const offsetY = Math.sin(angle) * distance;
-        
-        eyes.forEach(pupil => {
-            pupil.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
-        });
+    // 设置状态
+    setState(state) {
+        this.pet.classList.remove('idle', 'happy', 'surprised', 'sleeping', 'thinking', 'waving');
+        this.state = state;
+        this.pet.classList.add(state);
     }
     
-    // ========== 状态管理 ==========
-    
-    setMood(mood) {
-        this.element.classList.remove('idle', 'happy', 'surprised', 'sleeping', 'thinking', 'waving');
-        this.element.classList.add(mood);
-        this.state.mood = mood;
-    }
-    
-    addHappiness(amount) {
-        this.state.happiness = Math.min(100, Math.max(0, this.state.happiness + amount));
-        this.updateStatsDisplay();
-        this.saveSettings();
-    }
-    
-    addEnergy(amount) {
-        this.state.energy = Math.min(100, Math.max(0, this.state.energy + amount));
-        this.updateStatsDisplay();
-        this.saveSettings();
-    }
-    
-    updateStatsDisplay() {
-        const happinessEl = document.getElementById('petHappiness');
-        const energyEl = document.getElementById('petEnergy');
-        
-        if (happinessEl) happinessEl.textContent = this.state.happiness;
-        if (energyEl) energyEl.textContent = this.state.energy;
-    }
-    
-    recordInteraction() {
-        this.state.lastInteraction = Date.now();
-        
-        // 重置睡眠定时器
-        if (this.state.settings.autoSleep) {
-            this.resetSleepTimer();
-        }
-    }
-    
-    // ========== 说话功能 ==========
-    
+    // 说话
     say(text, duration = 4000) {
-        if (!text) return;
+        if (this.settings.interactionFreq === 'low' && this.state !== 'sleeping') {
+            // 安静模式下减少说话
+            if (Math.random() > 0.3) return;
+        }
         
         this.speechText.textContent = text;
         this.speechBubble.classList.add('show');
         
-        // 清除之前的隐藏定时器
-        if (this.timers.hideSpeech) {
-            clearTimeout(this.timers.hideSpeech);
-        }
-        
-        this.timers.hideSpeech = setTimeout(() => {
+        clearTimeout(this.speechTimer);
+        this.speechTimer = setTimeout(() => {
             this.speechBubble.classList.remove('show');
         }, duration);
     }
     
-    getRandomDialogue(category) {
-        const dialogues = this.dialogues[category];
-        if (!dialogues || dialogues.length === 0) return '';
+    // 获取随机对话
+    getRandomDialogue(type) {
+        const dialogues = this.dialogues[type];
         return dialogues[Math.floor(Math.random() * dialogues.length)];
     }
     
-    // ========== 菜单功能 ==========
-    
-    toggleMenu() {
-        if (this.menu.classList.contains('show')) {
-            this.closeMenu();
+    // 设置配料
+    setTopping(type, showDialog = true) {
+        // 移除所有配料样式
+        this.topping.classList.remove('butter', 'jam', 'honey', 'chocolate');
+        
+        if (type && type !== 'none') {
+            this.topping.classList.add(type);
+            this.currentTopping = type;
+            localStorage.setItem('petTopping', type);
+            
+            // 说话
+            if (showDialog) {
+                const text = this.getRandomDialogue('topping').replace('{topping}', this.toppingNames[type]);
+                this.say(text);
+                this.setState('happy');
+                setTimeout(() => this.setState('idle'), 2000);
+            }
         } else {
-            this.openMenu();
+            this.currentTopping = 'none';
+            localStorage.setItem('petTopping', 'none');
+            if (showDialog) {
+                this.say('清爽的原味吐司！');
+            }
         }
     }
     
-    openMenu() {
-        this.menu.classList.add('show');
-        this.updateMenuPosition();
+    // 切换配料
+    cycleTopping() {
+        const toppings = ['none', 'butter', 'jam', 'honey', 'chocolate'];
+        const currentIndex = toppings.indexOf(this.currentTopping);
+        const nextIndex = (currentIndex + 1) % toppings.length;
+        this.setTopping(toppings[nextIndex]);
     }
     
-    closeMenu() {
-        this.menu.classList.remove('show');
+    // 睡眠
+    sleep() {
+        this.setState('sleeping');
+        this.say(this.getRandomDialogue('sleepy'));
+        clearTimeout(this.idleTimer);
     }
     
-    updateMenuPosition() {
-        const petRect = this.element.getBoundingClientRect();
-        const menuHeight = this.menu.offsetHeight;
-        
-        // 确保菜单在视口内
-        let top = petRect.top - menuHeight - 10;
-        let left = petRect.left;
-        
-        if (top < 10) {
-            top = petRect.bottom + 10;
-        }
-        
-        if (left + 200 > window.innerWidth) {
-            left = window.innerWidth - 210;
-        }
-        
-        this.menu.style.top = top + 'px';
-        this.menu.style.left = left + 'px';
-        this.menu.style.bottom = 'auto';
-        this.menu.style.right = 'auto';
+    // 唤醒
+    wakeUp() {
+        this.setState('surprised');
+        this.say(this.getRandomDialogue('wakeup'));
+        setTimeout(() => this.setState('idle'), 1500);
+        this.startIdleTimer();
     }
     
-    // ========== 定时器 ==========
-    
-    startTimers() {
-        // 自动说话
-        this.startAutoTalk();
-        
-        // 状态更新
-        this.timers.statusUpdate = setInterval(() => {
-            this.updateStatus();
-        }, 60000); // 每分钟
-        
-        // 睡眠检测
-        if (this.state.settings.autoSleep) {
-            this.resetSleepTimer();
-        }
-    }
-    
-    startAutoTalk() {
+    // 开始空闲计时器
+    startIdleTimer() {
         const intervals = {
             high: 30000,    // 30秒
             medium: 60000,  // 1分钟
             low: 180000     // 3分钟
         };
         
-        const interval = intervals[this.state.settings.interactionFreq] || intervals.medium;
-        
-        if (this.timers.autoTalk) {
-            clearInterval(this.timers.autoTalk);
-        }
-        
-        this.timers.autoTalk = setInterval(() => {
-            if (!this.state.isSleeping && Math.random() > 0.5) {
+        clearInterval(this.idleTimer);
+        this.idleTimer = setInterval(() => {
+            if (this.state !== 'sleeping') {
                 this.say(this.getRandomDialogue('idle'));
+                
+                // 随机动作
+                const actions = ['thinking', 'waving'];
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                this.setState(randomAction);
+                setTimeout(() => this.setState('idle'), 2000);
             }
-        }, interval);
-    }
-    
-    resetSleepTimer() {
-        if (this.timers.sleep) {
-            clearTimeout(this.timers.sleep);
-        }
+        }, intervals[this.settings.interactionFreq] || intervals.medium);
         
-        // 5分钟无操作进入睡眠
-        this.timers.sleep = setTimeout(() => {
-            if (this.state.settings.autoSleep && !this.state.isSleeping) {
-                this.goToSleep();
-            }
-        }, 300000);
-    }
-    
-    updateStatus() {
-        // 随时间降低能量
-        this.addEnergy(-2);
-        
-        // 如果能量太低，自动睡觉
-        if (this.state.energy < 20 && !this.state.isSleeping) {
-            this.say('好累呀...需要休息一下...');
-            setTimeout(() => this.goToSleep(), 3000);
+        // 自动睡眠定时器
+        if (this.settings.autoSleep) {
+            this.startSleepTimer();
         }
     }
     
-    // ========== 睡眠功能 ==========
-    
-    goToSleep() {
-        this.state.isSleeping = true;
-        this.setMood('sleeping');
-        this.say(this.getRandomDialogue('sleep'), 3000);
-        this.closeMenu();
-        
-        // 睡眠恢复能量
-        this.timers.sleepRecover = setInterval(() => {
-            this.addEnergy(5);
-            if (this.state.energy >= 100) {
-                clearInterval(this.timers.sleepRecover);
-            }
-        }, 10000);
-    }
-    
-    wakeUp() {
-        this.state.isSleeping = false;
-        this.setMood('idle');
-        this.say(this.getRandomDialogue('wakeup'));
-        
-        if (this.timers.sleepRecover) {
-            clearInterval(this.timers.sleepRecover);
+    // 重置空闲计时器
+    resetIdleTimer() {
+        clearTimeout(this.sleepTimer);
+        if (this.settings.autoSleep) {
+            this.startSleepTimer();
         }
-        
-        this.recordInteraction();
     }
     
-    // ========== 位置设置 ==========
+    // 开始睡眠计时器
+    startSleepTimer() {
+        clearTimeout(this.sleepTimer);
+        this.sleepTimer = setTimeout(() => {
+            if (this.state !== 'sleeping') {
+                this.sleep();
+            }
+        }, 300000); // 5分钟
+    }
     
-    setInitialPosition() {
-        if (this.state.position.x !== null && this.state.position.y !== null) {
-            // 使用保存的位置
-            this.element.style.left = this.state.position.x + 'px';
-            this.element.style.top = this.state.position.y + 'px';
-            this.element.style.right = 'auto';
-            this.element.style.bottom = 'auto';
+    // 显示/隐藏菜单
+    toggleMenu() {
+        if (this.menu.classList.contains('show')) {
+            this.closeMenu();
         } else {
-            // 使用默认位置
-            this.applyPositionPreset(this.state.settings.position);
+            this.showMenu();
         }
     }
     
-    applyPositionPreset(preset) {
-        this.element.style.left = 'auto';
-        this.element.style.top = 'auto';
-        this.element.style.right = 'auto';
-        this.element.style.bottom = 'auto';
+    showMenu() {
+        // 更新菜单位置
+        const petRect = this.pet.getBoundingClientRect();
+        this.menu.style.left = 'auto';
+        this.menu.style.right = (window.innerWidth - petRect.right) + 'px';
+        this.menu.style.bottom = (window.innerHeight - petRect.top + 10) + 'px';
+        this.menu.style.top = 'auto';
         
-        switch (preset) {
-            case 'bottom-right':
-                this.element.style.bottom = '30px';
-                this.element.style.right = '30px';
-                break;
-            case 'bottom-left':
-                this.element.style.bottom = '30px';
-                this.element.style.left = '30px';
-                break;
-            case 'top-right':
-                this.element.style.top = '100px';
-                this.element.style.right = '30px';
-                break;
-            case 'top-left':
-                this.element.style.top = '100px';
-                this.element.style.left = '30px';
-                break;
-        }
-        
-        this.state.position = { x: null, y: null };
+        this.menu.classList.add('show');
+        this.updateStats();
     }
     
-    // ========== 系统集成 ==========
+    closeMenu() {
+        this.menu.classList.remove('show');
+    }
     
-    listenForNotifications() {
-        // 监听全局通知事件
-        window.addEventListener('system-notification', (e) => {
-            this.onSystemNotification(e.detail);
-        });
-        
-        // 重写 showAlert 以触发桌宠反应
+    // 更新状态显示
+    updateStats() {
+        document.getElementById('petHappiness').textContent = this.happiness;
+        document.getElementById('petEnergy').textContent = this.energy;
+    }
+    
+    // 增加好感度
+    addHappiness(amount) {
+        this.happiness = Math.min(100, this.happiness + amount);
+        this.updateStats();
+    }
+    
+    // 监听系统通知
+    observeNotifications() {
+        // 监听 showAlert 调用
         const originalShowAlert = window.showAlert;
-        if (typeof originalShowAlert === 'function') {
-            window.showAlert = (message, type) => {
+        if (originalShowAlert) {
+            window.showAlert = (message, type = 'info') => {
                 originalShowAlert(message, type);
-                this.onSystemNotification({ message, type });
+                
+                if (this.settings.notifyEnabled && this.state !== 'sleeping') {
+                    this.onSystemNotification(message, type);
+                }
             };
         }
     }
     
-    onSystemNotification(notification) {
-        if (!this.state.settings.notifyEnabled) return;
-        
-        // 唤醒
-        if (this.state.isSleeping) {
-            this.wakeUp();
-        }
-        
-        // 根据通知类型反应
-        const { message, type } = notification;
-        
+    // 处理系统通知
+    onSystemNotification(message, type) {
         if (type === 'success') {
-            this.setMood('happy');
-            this.say('太棒了！操作成功啦~ 🎉');
+            this.setState('happy');
+            this.say('太棒了！操作成功！🎉');
         } else if (type === 'danger' || type === 'error') {
-            this.setMood('surprised');
-            this.say('哎呀！出了点问题... 😟');
+            this.setState('surprised');
+            this.say('哎呀，出错了！😟');
         } else if (type === 'warning') {
-            this.setMood('thinking');
-            this.say('嗯...需要注意一下哦~');
-        } else {
-            this.showStatusIndicator();
-            this.say(this.getRandomDialogue('notice'));
+            this.setState('thinking');
+            this.say('注意看这条提示哦！');
         }
         
+        this.statusIndicator.classList.add('show');
         setTimeout(() => {
-            this.setMood('idle');
-            this.hideStatusIndicator();
+            this.statusIndicator.classList.remove('show');
+            this.setState('idle');
         }, 3000);
     }
     
-    showStatusIndicator() {
-        this.statusIndicator.classList.add('show');
-    }
-    
-    hideStatusIndicator() {
-        this.statusIndicator.classList.remove('show');
-    }
-    
-    // ========== 获取系统数据 ==========
-    
-    async getSystemSummary() {
-        try {
-            const [classrooms, courses, schedules] = await Promise.all([
-                api('/classrooms').catch(() => []),
-                api('/courses').catch(() => []),
-                api('/schedules').catch(() => [])
-            ]);
-            
-            return {
-                classroomCount: classrooms.length,
-                courseCount: courses.length,
-                scheduleCount: schedules.length,
-                availableClassrooms: classrooms.filter(c => c.status === 'available').length
-            };
-        } catch (e) {
-            return null;
+    // 监听登录状态
+    observeLoginState() {
+        const observer = new MutationObserver(() => {
+            if (this.isLoggedIn()) {
+                this.show();
+            } else {
+                this.hide();
+            }
+        });
+        
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            observer.observe(mainContainer, { attributes: true, attributeFilter: ['style'] });
         }
+    }
+    
+    // 加载设置
+    loadSettings() {
+        const defaults = {
+            name: '小吐司',
+            position: 'bottom-right',
+            interactionFreq: 'medium',
+            soundEnabled: false,
+            notifyEnabled: true,
+            autoSleep: true
+        };
+        
+        try {
+            const saved = localStorage.getItem('petSettings');
+            return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+        } catch {
+            return defaults;
+        }
+    }
+    
+    // 保存设置
+    saveSettings() {
+        this.settings = {
+            name: document.getElementById('petNameInput').value || '小吐司',
+            position: document.getElementById('petPositionSelect').value,
+            interactionFreq: document.getElementById('petInteractionFreq').value,
+            soundEnabled: document.getElementById('petSoundEnabled').checked,
+            notifyEnabled: document.getElementById('petNotifyEnabled').checked,
+            autoSleep: document.getElementById('petAutoSleep').checked
+        };
+        
+        localStorage.setItem('petSettings', JSON.stringify(this.settings));
+        this.applySettings();
+        
+        this.say('设置已保存！谢谢～');
+        this.setState('happy');
+        setTimeout(() => this.setState('idle'), 1500);
+    }
+    
+    // 应用设置
+    applySettings() {
+        // 应用位置
+        const positions = {
+            'bottom-right': { bottom: '30px', right: '30px', top: 'auto', left: 'auto' },
+            'bottom-left': { bottom: '30px', left: '30px', top: 'auto', right: 'auto' },
+            'top-right': { top: '80px', right: '30px', bottom: 'auto', left: 'auto' },
+            'top-left': { top: '80px', left: '30px', bottom: 'auto', right: 'auto' }
+        };
+        
+        const pos = positions[this.settings.position];
+        if (pos) {
+            Object.assign(this.pet.style, pos);
+        }
+        
+        // 更新设置表单
+        const nameInput = document.getElementById('petNameInput');
+        const posSelect = document.getElementById('petPositionSelect');
+        const freqSelect = document.getElementById('petInteractionFreq');
+        const soundCheck = document.getElementById('petSoundEnabled');
+        const notifyCheck = document.getElementById('petNotifyEnabled');
+        const sleepCheck = document.getElementById('petAutoSleep');
+        
+        if (nameInput) nameInput.value = this.settings.name;
+        if (posSelect) posSelect.value = this.settings.position;
+        if (freqSelect) freqSelect.value = this.settings.interactionFreq;
+        if (soundCheck) soundCheck.checked = this.settings.soundEnabled;
+        if (notifyCheck) notifyCheck.checked = this.settings.notifyEnabled;
+        if (sleepCheck) sleepCheck.checked = this.settings.autoSleep;
+    }
+    
+    // 执行动作
+    action(type) {
+        switch (type) {
+            case 'greet':
+                this.say(this.getRandomDialogue('greet'));
+                this.setState('waving');
+                setTimeout(() => this.setState('idle'), 2000);
+                break;
+                
+            case 'summary':
+                this.showSummary();
+                break;
+                
+            case 'remind':
+                this.showReminders();
+                break;
+                
+            case 'weather':
+                this.say(this.getRandomDialogue('weather'));
+                this.setState('happy');
+                setTimeout(() => this.setState('idle'), 2000);
+                break;
+                
+            case 'encourage':
+                this.say(this.getRandomDialogue('encourage'));
+                this.setState('happy');
+                this.addHappiness(5);
+                setTimeout(() => this.setState('idle'), 2500);
+                break;
+                
+            case 'topping':
+                this.cycleTopping();
+                break;
+                
+            case 'sleep':
+                this.sleep();
+                break;
+                
+            case 'settings':
+                const modal = new bootstrap.Modal(document.getElementById('petSettingsModal'));
+                modal.show();
+                break;
+        }
+        
+        this.closeMenu();
+    }
+    
+    // 显示今日概览
+    async showSummary() {
+        this.setState('thinking');
+        this.say('让我看看今天的情况...');
+        
+        try {
+            // 尝试获取系统数据
+            const stats = await this.fetchSystemStats();
+            setTimeout(() => {
+                this.say(`今日有 ${stats.bookings} 个预约，${stats.courses} 门课程～`);
+                this.setState('happy');
+                setTimeout(() => this.setState('idle'), 3000);
+            }, 1500);
+        } catch {
+            setTimeout(() => {
+                this.say('暂时无法获取数据，稍后再试吧！');
+                this.setState('idle');
+            }, 1500);
+        }
+    }
+    
+    // 获取系统统计
+    async fetchSystemStats() {
+        // 模拟数据，实际可以调用API
+        return {
+            bookings: Math.floor(Math.random() * 10) + 1,
+            courses: Math.floor(Math.random() * 8) + 1,
+            classrooms: Math.floor(Math.random() * 20) + 5
+        };
+    }
+    
+    // 显示提醒
+    showReminders() {
+        this.setState('thinking');
+        
+        setTimeout(() => {
+            const reminders = [
+                '记得检查今天的课程安排哦！',
+                '有几个预约即将开始～',
+                '别忘了更新设备状态！',
+                '今天的任务完成了吗？'
+            ];
+            this.say(reminders[Math.floor(Math.random() * reminders.length)]);
+            this.setState('idle');
+        }, 1000);
     }
 }
 
-// ========== 全局函数 ==========
-
+// 全局变量
 let desktopPet = null;
 
-// 页面加载后初始化桌宠
+// 初始化桌宠
 document.addEventListener('DOMContentLoaded', () => {
-    // 只在登录后显示桌宠
-    const checkLogin = setInterval(() => {
-        if (document.getElementById('mainContainer')?.style.display !== 'none') {
-            if (!desktopPet) {
-                desktopPet = new DesktopPet();
-            }
-            clearInterval(checkLogin);
-        }
+    setTimeout(() => {
+        desktopPet = new DesktopPet();
     }, 1000);
 });
 
-// 菜单操作
+// 全局函数
 function closePetMenu() {
     if (desktopPet) {
         desktopPet.closeMenu();
     }
 }
 
-// 桌宠动作
-async function petAction(action) {
-    if (!desktopPet) return;
-    
-    desktopPet.closeMenu();
-    desktopPet.recordInteraction();
-    
-    switch (action) {
-        case 'greet':
-            desktopPet.setMood('waving');
-            desktopPet.say(desktopPet.getRandomDialogue('greet'));
-            desktopPet.addHappiness(10);
-            setTimeout(() => desktopPet.setMood('idle'), 2000);
-            break;
-            
-        case 'summary':
-            desktopPet.setMood('thinking');
-            desktopPet.say('让我看看今天的数据...');
-            
-            const summary = await desktopPet.getSystemSummary();
-            
-            setTimeout(() => {
-                if (summary) {
-                    desktopPet.say(`📊 系统概览：\n教室 ${summary.classroomCount} 间\n课程 ${summary.courseCount} 门\n排课 ${summary.scheduleCount} 条`, 6000);
-                } else {
-                    desktopPet.say('哎呀，获取数据失败了...');
-                }
-                desktopPet.setMood('idle');
-            }, 2000);
-            break;
-            
-        case 'remind':
-            desktopPet.setMood('thinking');
-            const now = new Date();
-            const hour = now.getHours();
-            let reminder = '';
-            
-            if (hour < 9) {
-                reminder = '早上好！新的一天开始了~';
-            } else if (hour < 12) {
-                reminder = '上午工作时间，加油哦！';
-            } else if (hour < 14) {
-                reminder = '中午啦，记得吃午饭休息~';
-            } else if (hour < 18) {
-                reminder = '下午了，继续努力！';
-            } else if (hour < 22) {
-                reminder = '晚上了，注意劳逸结合~';
-            } else {
-                reminder = '夜深了，早点休息吧~';
-            }
-            
-            desktopPet.say(reminder);
-            setTimeout(() => desktopPet.setMood('idle'), 2000);
-            break;
-            
-        case 'weather':
-            desktopPet.setMood('happy');
-            desktopPet.say(desktopPet.getRandomDialogue('weather'));
-            setTimeout(() => desktopPet.setMood('idle'), 2000);
-            break;
-            
-        case 'encourage':
-            desktopPet.setMood('happy');
-            desktopPet.say(desktopPet.getRandomDialogue('encourage'));
-            desktopPet.addHappiness(15);
-            setTimeout(() => desktopPet.setMood('idle'), 3000);
-            break;
-            
-        case 'sleep':
-            if (desktopPet.state.isSleeping) {
-                desktopPet.wakeUp();
-            } else {
-                desktopPet.goToSleep();
-            }
-            break;
-            
-        case 'settings':
-            openPetSettings();
-            break;
+function petAction(type) {
+    if (desktopPet) {
+        desktopPet.action(type);
     }
 }
 
-// 打开设置
-function openPetSettings() {
-    if (!desktopPet) return;
-    
-    // 填充当前设置
-    document.getElementById('petNameInput').value = desktopPet.state.name;
-    document.getElementById('petPositionSelect').value = desktopPet.state.settings.position;
-    document.getElementById('petInteractionFreq').value = desktopPet.state.settings.interactionFreq;
-    document.getElementById('petSoundEnabled').checked = desktopPet.state.settings.soundEnabled;
-    document.getElementById('petNotifyEnabled').checked = desktopPet.state.settings.notifyEnabled;
-    document.getElementById('petAutoSleep').checked = desktopPet.state.settings.autoSleep;
-    
-    // 显示模态框
-    const modal = new bootstrap.Modal(document.getElementById('petSettingsModal'));
-    modal.show();
-}
-
-// 保存设置
 function savePetSettings() {
-    if (!desktopPet) return;
-    
-    const newName = document.getElementById('petNameInput').value.trim();
-    const newPosition = document.getElementById('petPositionSelect').value;
-    const newFreq = document.getElementById('petInteractionFreq').value;
-    const soundEnabled = document.getElementById('petSoundEnabled').checked;
-    const notifyEnabled = document.getElementById('petNotifyEnabled').checked;
-    const autoSleep = document.getElementById('petAutoSleep').checked;
-    
-    // 更新状态
-    desktopPet.state.name = newName || '小助手';
-    desktopPet.state.settings.position = newPosition;
-    desktopPet.state.settings.interactionFreq = newFreq;
-    desktopPet.state.settings.soundEnabled = soundEnabled;
-    desktopPet.state.settings.notifyEnabled = notifyEnabled;
-    desktopPet.state.settings.autoSleep = autoSleep;
-    
-    // 应用位置变更
-    if (newPosition !== desktopPet.state.settings.position || desktopPet.state.position.x !== null) {
-        desktopPet.applyPositionPreset(newPosition);
-    }
-    
-    // 重启自动说话
-    desktopPet.startAutoTalk();
-    
-    // 保存
-    desktopPet.saveSettings();
-    
-    // 关闭模态框
-    bootstrap.Modal.getInstance(document.getElementById('petSettingsModal')).hide();
-    
-    // 反馈
-    desktopPet.say(`设置已保存！你可以叫我"${desktopPet.state.name}"哦~`);
-    desktopPet.setMood('happy');
-    setTimeout(() => desktopPet.setMood('idle'), 2000);
-    
-    if (typeof showAlert === 'function') {
-        showAlert('桌宠设置已保存', 'success');
-    }
-}
-
-// 触发桌宠说话（供外部调用）
-function petSay(text, duration) {
     if (desktopPet) {
-        desktopPet.say(text, duration);
+        desktopPet.saveSettings();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('petSettingsModal'));
+        if (modal) modal.hide();
     }
 }
-
-// 触发桌宠心情（供外部调用）
-function petMood(mood) {
-    if (desktopPet) {
-        desktopPet.setMood(mood);
-    }
-}
-
-// 导出供全局使用
-window.petSay = petSay;
-window.petMood = petMood;
-window.petAction = petAction;
