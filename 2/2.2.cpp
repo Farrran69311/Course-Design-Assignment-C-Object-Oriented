@@ -7,10 +7,10 @@ class Song {
 private:
     string singer;
     string title;
-    double size; // 假设单位为 MB
+    double size; 
 
 public:
-    // 构造函数：初始化歌曲信息
+    // 构造函数
     Song(string singer, string title, double size) {
         this->singer = singer;
         this->title = title;

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cmath> // 用于 sqrt() 和 pow()
+#include <cmath> 
 
 using namespace std;
 

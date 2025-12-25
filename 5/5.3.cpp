@@ -2,7 +2,7 @@
 #include <string>
 using namespace std;
 
-// 顶级基类: 员工
+// 基类: 员工
 class Employee {
 protected:
     string name;
@@ -11,8 +11,7 @@ protected:
 public:
     Employee(string n, int i) : name(n), id(i) {}
     
-    // 纯虚函数，使 Employee 成为抽象类 (可选，但推荐)
-    // 这里为了简单，我们定义一个普通的虚函数
+    //定义一个普通的虚函数
     virtual double calculateSalary() {
         return 0; 
     }
@@ -22,7 +21,7 @@ public:
     }
 };
 
-// 派生类 1: 销售人员 (使用 virtual 继承解决菱形问题)
+// 派生类 1: 销售人员 
 class Salesman : virtual public Employee {
 protected:
     double sales; // 销售额
@@ -52,10 +51,10 @@ public:
     }
 };
 
-// 最终派生类: 销售经理
+// 派生类: 销售经理
 class SalesManager : public Salesman, public Manager {
 public:
-    // 关键点：对于虚继承，最底层的派生类必须显式初始化【顶级基类 Employee】
+    // 关键点：对于虚继承，最底层的派生类必须显式初始化
     SalesManager(string n, int i, double s, double r, double m)
         : Employee(n, i),         // 直接初始化顶级基类
           Salesman(n, i, s, r),   // 初始化父类1

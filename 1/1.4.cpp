@@ -4,21 +4,45 @@
 
 using namespace std;
 
-// 定义统计函数
-// 参数使用 const string& (常量引用)，避免复制长字符串，提高效率
-int countLetters(const string& sentence) {
-    int count = 0;
-    
-    // 使用范围 for 循环遍历字符串中的每一个字符
-    for (char c : sentence) {
-        // isalpha(c) 检查字符 c 是否为字母（包括大写和小写）
-        if (isalpha(c)) {
-            count++;
-        }
+// 面向对象方式：定义句子分析器类
+class SentenceAnalyzer {
+private:
+    string sentence;// 私有成员变量：存储句子
+
+public:
+    // 构造函数：初始化句子
+    SentenceAnalyzer(const string& s) : sentence(s) {}
+
+    // 设置句子的方法
+    void setSentence(const string& s) {
+        sentence = s;
     }
-    
-    return count;
-}
+
+    // 获取句子的方法
+    string getSentence() const {
+        return sentence;
+    }
+
+    // 统计字母个数的方法
+    int countLetters() const {
+        int count = 0;
+        
+        // 使用范围 for 循环遍历字符串中的每一个字符
+        for (char c : sentence) {
+            // isalpha(c) 检查字符 c 是否为字母（包括大写和小写）
+            if (isalpha(c)) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+
+    // 显示分析结果的方法
+    void displayResult() const {
+        cout << "该句子中字母的个数为: " << countLetters() << endl;
+    }
+};
 
 int main() {
     string inputSentence;
@@ -30,11 +54,11 @@ int main() {
     // 注意：这里使用 getline 而不是 cin >>，因为句子可能包含空格
     getline(cin, inputSentence);
 
-    // 3. 调用函数处理
-    int result = countLetters(inputSentence);
+    // 3. 创建对象并处理
+    SentenceAnalyzer analyzer(inputSentence);
 
-    // 4. 输出结果
-    cout << "该句子中字母的个数为: " << result << endl;
+    // 4. 调用对象方法输出结果
+    analyzer.displayResult();
 
     return 0;
 }

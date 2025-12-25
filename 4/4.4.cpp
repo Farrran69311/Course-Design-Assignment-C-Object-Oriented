@@ -11,8 +11,7 @@ public:
         return (a > b) ? a : b;
     }
     
-    // 2. 模板特化：专门处理 C 风格字符串 (const char*)
-    // 因为 char* 直接比较的是地址，必须用 strcmp 比较内容
+    // char* 比较的是地址，用 strcmp 比较内容
     static const char* getMax(const char* a, const char* b) {
         if (std::strcmp(a, b) > 0) {
             return a;

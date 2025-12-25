@@ -175,6 +175,9 @@ class ToastPet {
         this.pet.addEventListener('click', (e) => this.onClick(e));
         this.pet.addEventListener('dblclick', (e) => this.onDoubleClick(e));
         
+        // 眼睛跟随鼠标
+        document.addEventListener('mousemove', (e) => this.updateEyeTracking(e));
+        
         // 右键菜单
         this.pet.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -636,6 +639,25 @@ class ToastPet {
     showScene(sceneId) {
         const scene = document.getElementById(sceneId);
         if (scene) {
+            // 将场景定位到角色附近
+            const petRect = this.pet.getBoundingClientRect();
+            const sceneWidth = 80; // 场景大约宽度
+            
+            // 场景显示在角色旁边
+            if (petRect.left > window.innerWidth / 2) {
+                // 角色在右侧，场景显示在左边
+                scene.style.left = Math.max(10, petRect.left - sceneWidth - 20) + 'px';
+                scene.style.right = 'auto';
+            } else {
+                // 角色在左侧，场景显示在右边
+                scene.style.left = Math.min(window.innerWidth - sceneWidth - 10, petRect.right + 20) + 'px';
+                scene.style.right = 'auto';
+            }
+            
+            // 垂直位置与角色底部对齐
+            scene.style.bottom = (window.innerHeight - petRect.bottom + 5) + 'px';
+            scene.style.top = 'auto';
+            
             scene.classList.add('active');
         }
     }
@@ -645,6 +667,34 @@ class ToastPet {
         if (scene) {
             scene.classList.remove('active');
         }
+    }
+    
+    // ===== 眼睛跟随系统 =====
+    updateEyeTracking(e) {
+        // 拖拽或睡眠时不跟随
+        if (this.drag.isDragging || this.state.currentState === 'sleeping') return;
+        
+        const pupils = this.pet.querySelectorAll('.toast-pupil');
+        if (!pupils.length) return;
+        
+        const petRect = this.pet.getBoundingClientRect();
+        const petCenterX = petRect.left + petRect.width / 2;
+        const petCenterY = petRect.top + petRect.height / 3; // 眼睛大约在上1/3位置
+        
+        // 计算鼠标相对于宠物中心的角度和距离
+        const dx = e.clientX - petCenterX;
+        const dy = e.clientY - petCenterY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // 限制瞳孔移动范围（最大3px）
+        const maxMove = 3;
+        const moveX = Math.min(maxMove, Math.max(-maxMove, dx / 50));
+        const moveY = Math.min(maxMove, Math.max(-maxMove, dy / 50));
+        
+        // 应用到所有瞳孔
+        pupils.forEach(pupil => {
+            pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
     }
     
     // ===== 特效系统 =====
@@ -764,6 +814,27 @@ class ToastPet {
             console.warn('⚠️ 菜单元素未找到');
             return;
         }
+        
+        // 计算菜单位置 - 跟随角色
+        const petRect = this.pet.getBoundingClientRect();
+        const menuWidth = 200;
+        const menuHeight = 350;
+        
+        // 判断角色在屏幕左侧还是右侧，菜单显示在另一侧
+        if (petRect.left > window.innerWidth / 2) {
+            // 角色在右侧，菜单显示在左边
+            this.menu.style.left = Math.max(10, petRect.left - menuWidth - 15) + 'px';
+            this.menu.style.right = 'auto';
+        } else {
+            // 角色在左侧，菜单显示在右边
+            this.menu.style.left = Math.min(window.innerWidth - menuWidth - 10, petRect.right + 15) + 'px';
+            this.menu.style.right = 'auto';
+        }
+        
+        // 垂直位置跟随角色
+        this.menu.style.bottom = 'auto';
+        this.menu.style.top = Math.max(10, Math.min(window.innerHeight - menuHeight - 10, petRect.top - 50)) + 'px';
+        
         this.menu.classList.toggle('show');
         this.updateStats();
     }
